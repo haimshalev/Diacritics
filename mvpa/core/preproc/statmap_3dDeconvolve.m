@@ -359,7 +359,7 @@ if isempty(args.regs_1d_name)
 end
 
 if isempty(args.bucket_name)
-  args.bucket_name = sprintf('%s_it%i_bucket+orig',data_patname,args.cur_iteration);
+  args.bucket_name = sprintf('%s_it%i_bucket+tlrc',data_patname,args.cur_iteration);
 else
   args.bucket_name = sprintf('%s_%i_bucket+orig',args.bucket_name,args.cur_iteration);
 end
