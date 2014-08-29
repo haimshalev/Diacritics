@@ -12,7 +12,7 @@ function [subj results] = trainsub(subj)
 
     % run multiple train iteration (any iteration have n n minus one cross
     % validation)
-    subj = init_object(subj,'regressors','conds_sh3B');
+    subj = init_object(subj,'regressors','classificationRegMat');
     [subj results] = runTrainIterations(subj, class_args, 5);
 end
 
@@ -44,20 +44,18 @@ end
 function [subj results] = trainIteration(subj, class_args)
     
     global currentFeaturesMaskName;
+    global performanceMethod;
 
     % Classification
     
-    % Creating a binary regs vector 
-    % It's the same matrix where the second condition is unused
-    % If a cell have the value one it's the first condition, if it's zero
-    % it is the second condition
-    binaryReg = get_mat(subj,'regressors','conds_sh3');
-    binaryReg(2,:) = [];
-    subj = set_mat(subj,'regressors','conds_sh3B', binaryReg);
+    % Create the classification targets
+    classificationRegMat = get_mat(subj,'regressors','conds_sh3');
+    classificationRegMat = createClassificationRegressorsMatrix(classificationRegMat);
+    subj = set_mat(subj,'regressors','classificationRegMat', classificationRegMat);
 
     % now, run the classification multiple times, training and testing
     % on different subsets of the data on each iteratio
     % using the binary preformance function and the new regs vector
-    [subj results] = cross_validation(subj,'epi_z','conds_sh3B','runs_xval', currentFeaturesMaskName,class_args,'perfmet_functs',{'perfmet_binaryDecision'}); 
+    [subj results] = cross_validation(subj,'epi_z','classificationRegMat','runs_xval', currentFeaturesMaskName,class_args,'perfmet_functs',{performanceMethod}); 
 
 end 

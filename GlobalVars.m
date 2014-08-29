@@ -79,3 +79,18 @@ end
 global chosenConditions;
 chosenConditions = [1 2];
 
+% how the classificaion should work : binary or maxClass
+global decisionMethod;
+decisionMethod = 'binary'; 
+
+% performance method function name
+global performanceMethod;
+if (strcmp(decisionMethod,'binary') == 1)
+    performanceMethod = 'perfmet_binaryDecision';
+elseif (strcmp(decisionMethod,'maxClass') == 1)
+    performanceMethod = 'perfmet_maxclass';
+else
+    error('unrecognized classification decision method');
+end
+    
+
