@@ -12,6 +12,10 @@ subjectName = ['sub' currentSubject];
 global dataDir;
 dataDir = '/home/haimshalev/Diacritics/Data/';
 
+% how to create the subjects objects. The values are : OneRun/EntireRuns
+global testsBuildMethod;
+testsBuildMethod = 'EntireRuns';
+
 %% mask properties
 
 global maskPath;
@@ -92,5 +96,13 @@ elseif (strcmp(decisionMethod,'maxClass') == 1)
 else
     error('unrecognized classification decision method');
 end
+
+%% output files
+
+global subjectsFolderPath;
+subjectsFolderPath = '../Output/Subjects/';
+
+global outputSubjectFileName;
+outputSubjectFileName = [subjectsFolderPath subjectName ' ' testsBuildMethod ' Conds ' int2str(chosenConditions) ' IsAnova ' int2str(isAnova)];
     
 

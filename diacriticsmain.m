@@ -1,4 +1,4 @@
- %% Diacritics Project
+%% Diacritics Project
 % Main script - get mvpa, initialize data, train data
 
 %% initialization code
@@ -7,45 +7,50 @@
 GlobalVars
 global projectName;
 global subjectName;
-global chosenConditions;
-global isAnova;
+global outputSubjectFileName;
 
 warning off
 needToInitialize = true;
 mvpa_add_paths;
 RemoveAllFilesFromFolder;
 
-%% initialize subject 
+%% initialize subjects
 if needToInitialize == true
     
-    % return an initialized subj structure
-    % first param - the name of the db, second param - the structure name
-    % (should be the name of the subject we work on)
+    % initialize each subj run with a seperate subj object
+    [numberOfRuns runsSubjects] = getNumberOfSubjectsToCreate;
     
-    initialSubj = init_subj(projectName,subjectName);
-    initialSubj = initsub(initialSubj);  
-    subjectStatistics = gatherStatistics(initialSubj);
-    initialSubj = preprocesssub(initialSubj);
+    for runIdx = 1 : numberOfRuns
+        
+        RemoveAllFilesFromFolder;
+        
+        % return an initialized subj structure
+        % first param - the name of the db, second param - the structure name
+        % (should be the name of the subject we work on)
+        initialSubj = init_subj(projectName,getSubjectObjectName(runIdx));
+        initialSubj = initsub(initialSubj, runIdx);  
+        subjectStatistics = gatherStatistics(initialSubj);
+        initialSubj = preprocesssub(initialSubj, runIdx);
     
-    save([subjectName 'cond' int2str(chosenConditions) ' IsAnova ' int2str(isAnova)], 'initialSubj', '-v7.3');
+        runsSubjects = [runsSubjects initialSubj];
+    end
+    
+    save(outputSubjectFileName , 'runsSubjects', '-v7.3');
 end
 
 %% set the current test properties and train on the data
 
-% save the initialized subject stuct to HD
-subj = initialSubj;
+for runIdx = 1:length(runsSubjects)
+    % save the initialized subject stuct to HD
+    subj = runsSubjects(runIdx);
 
-% remove the unused selectors ( now all of the unused)
-% we using the first two conditions beacause we deleted all of the unused
-% conditions at the preprocesssub function
-subj = updateSelectors(subj, 'conds_sh3', [1 2]);
+    % run feature selection 
+    subj = runFeatureSelection(subj);
 
-% run feature selection 
-subj = runFeatureSelection(subj);
+    summarize(subj)
 
-summarize(subj)
-
-% train on the subject data and get the results
-[subj, trainResults] = trainsub(subj);
+    % train on the subject data and get the results
+    [subj, trainResults] = trainsub(subj);
+end
 
 warning on

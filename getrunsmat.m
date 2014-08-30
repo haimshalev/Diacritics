@@ -1,6 +1,6 @@
-function runsmat = getrunsmat()
+function runsmat = getrunsmat(runIdx)
 
-files = getscanfiles();
+files = getscanfiles(runIdx);
 
 diacriticsCount = 1;
 withoutDiacriticsCount = 1;
