@@ -41,6 +41,7 @@ end
 
 %% set the current test properties and train on the data
 
+trainResults = [];
 for runIdx = 1:length(runsSubjects)
     % save the initialized subject stuct to HD
     subj = runsSubjects(runIdx);
@@ -51,7 +52,10 @@ for runIdx = 1:length(runsSubjects)
     summarize(subj)
 
     % train on the subject data and get the results
-    [subj, trainResults] = trainsub(subj);
+    [subj, runTrainResults] = trainsub(subj);
+    
+    % save the current train results
+    trainResults = [trainResults runTrainResults];
 end
 
 warning on

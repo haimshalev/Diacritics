@@ -24,21 +24,30 @@ function [subj results] = runTrainIterations(subj, class_args, numOfIterations)
     
     selnames = find_group(subj,'selector', 'runs_xval');
     numOfTests = length(selnames);
-    results.avg = zeros(numOfTests, 1);
-    results.successTrainings = zeros(numOfIterations, numOfTests);
     
+    results.testSubjectName = subj.header.id;
+    results.successTrainings = zeros(numOfIterations, numOfTests);
+    results.accuracy = zeros(numOfIterations, numOfTests);
+        
     for iteration = 1 : numOfIterations
         [subj results.resultsObjects{iteration}] = trainIteration(subj, class_args);
         
         for test = 1: numOfTests
-             results.avg(test) = results.avg(test) + results.resultsObjects{iteration}.iterations(test).perf;
+             results.accuracy(iteration, test) = results.resultsObjects{iteration}.iterations(test).perf;
              results.successTrainings(iteration, test) = results.resultsObjects{iteration}.iterations(test).scratchpad.training_record.best_perf;
         end
     end 
     
-    % calculate avg
-    results.avg = results.avg ./ numOfIterations;
-    results.successTrainings = results.successTrainings ./ numOfIterations;
+    % save results
+    results.avgForEachTestOverIterations = mean(results.accuracy);
+    results.stdForEachTestOverIterations = std(results.accuracy,0,1);
+    results.avgForEachIterationsOverTests = mean(results.accuracy,2);
+    results.stdForEachIterationsOverTests = std(results.accuracy,0,2);
+    results.avgSuccessTrainingsForEachTestOverIterations = mean(results.successTrainings);
+    results.stdSuccessTrainingsForEachTestOverIterations = std(results.successTrainings,0,1);
+    results.avgSuccessTrainingsForEachIterationOverTests = mean(results.successTrainings,2);
+    results.stdSuccessTrainingsForEacIterationOverTests = std(results.successTrainings,0,2);
+    results.successTrainingsBinary = logical((results.successTrainings - class_args.goal) <= 0);
 end
 
 function [subj results] = trainIteration(subj, class_args)
