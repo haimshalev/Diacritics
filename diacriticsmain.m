@@ -31,7 +31,8 @@ if needToInitialize == true
         initialSubj = initsub(initialSubj, runIdx);  
         subjectStatistics = gatherStatistics(initialSubj);
         initialSubj = preprocesssub(initialSubj, runIdx);
-    
+        initialSubj = updateSelectors(initialSubj, 'conds_sh3', [1 2]);
+
         runsSubjects = [runsSubjects initialSubj];
     end
     
