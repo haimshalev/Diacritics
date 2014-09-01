@@ -97,6 +97,14 @@ else
     error('unrecognized classification decision method');
 end
 
+% x_runs Creation Method (Currently for oneRun) values :
+% nMinusOne/RandomPartitions
+global xRunMethod;
+xRunMethod = 'RandomPartitions';
+
+global xRunPartitions;
+xRunPartitions = 2;
+
 %% output files
 
 global subjectsFolderPath;

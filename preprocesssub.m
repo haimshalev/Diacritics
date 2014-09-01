@@ -68,16 +68,7 @@ function subj = preprocesssubForOneTest(sub , runIdx)
     % remove all the TRs of the untested conditions, remove all the non tested conditions
     subj = updateSelectors(subj , 'conds_sh3', chosenConditions);
 
-    % create leave one out runs
-    runs = get_mat(subj, 'selector', 'runs_xval_1');
-    runs(runs ~= 0) = 1 : count(runs);
-    subj = set_mat(subj, 'selector', 'runs', runs);
-
-    % now, create selector indices for the n different iterations of
-    % the nminusone
-    subj = remove_object(subj,'selector','runs_xval_1');
-    args.ignore_runs_zeros = true;
-    args.ignore_jumbled_runs = true;
-    subj = create_xvalid_indices(subj,'runs',args);
+    % create the new xRunMatrices
+    subj = CreateXRunMats(subj);
 
 end
