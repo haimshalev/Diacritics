@@ -12,7 +12,7 @@ global outputSubjectFileName;
 warning off
 needToInitialize = true;
 mvpa_add_paths;
-RemoveAllFilesFromFolder;
+RemoveAllFilesFromFolder(true);
 
 %% initialize subjects
 if needToInitialize == true
@@ -22,7 +22,7 @@ if needToInitialize == true
     
     for runIdx = 1 : numberOfRuns
         
-        RemoveAllFilesFromFolder;
+        RemoveAllFilesFromFolder(false);
         
         % return an initialized subj structure
         % first param - the name of the db, second param - the structure name
