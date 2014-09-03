@@ -14,7 +14,7 @@ dataDir = '/home/haimshalev/Diacritics/Data/';
 
 % how to create the subjects objects. The values are : OneRun/EntireRuns
 global testsBuildMethod;
-testsBuildMethod = 'EntireRuns';
+testsBuildMethod = 'OneRun';
 
 %% mask properties
 
@@ -100,17 +100,34 @@ end
 % x_runs Creation Method (Currently for oneRun) values :
 % nMinusOne/RandomPartitions
 global xRunMethod;
-xRunMethod = 'RandomPartitions';
+xRunMethod = 'nMinusOne';
 
 global xRunPartitions;
 xRunPartitions = 2;
 
 %% output files
 
+global outputFolderPath;
+outputFolderPath = '../Output/';
+
 global subjectsFolderPath;
-subjectsFolderPath = '../Output/Subjects/';
+subjectsFolderPath = [ outputFolderPath 'Subjects/'];
+
+global trainResultsFolderPath;
+trainResultsFolderPath = [ outputFolderPath 'TrainResults/'];
 
 global outputSubjectFileName;
-outputSubjectFileName = [subjectsFolderPath subjectName ' ' testsBuildMethod ' Conds ' int2str(chosenConditions) ' IsAnova ' int2str(isAnova)];
+outputSubjectFileName = [subjectsFolderPath subjectName ' ' ...
+                         testsBuildMethod ' Conds ' int2str(chosenConditions) ...
+                         ' IsAnova ' int2str(isAnova)];
     
-
+global outputTrainResultFileName;
+outputTrainResultFileName = [trainResultsFolderPath subjectName ' ' ...
+                         testsBuildMethod ' Conds ' int2str(chosenConditions) ...
+                         ' IsAnova ' int2str(isAnova) ' decisionMethod ' ...
+                         decisionMethod ];
+                     
+ if strcmp(testsBuildMethod, 'OneRun')
+     outputTrainResultFileName = [outputTrainResultFileName ' xRun ' xRunMethod];
+     outputSubjectFileName = [outputSubjectFileName ' xRun ' xRunMethod];
+ end

@@ -6,8 +6,8 @@
 % Get the global variables
 GlobalVars
 global projectName;
-global subjectName;
 global outputSubjectFileName;
+global outputTrainResultFileName;
 
 warning off
 needToInitialize = true;
@@ -56,6 +56,9 @@ for runIdx = 1:length(runsSubjects)
     
     % save the current train results
     trainResults = [trainResults runTrainResults];
+    
 end
+    
+save(outputTrainResultFileName, 'trainResults', '-v7.3');
 
 warning on

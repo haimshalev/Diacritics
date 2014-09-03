@@ -27,6 +27,7 @@ function [subj results] = runTrainIterations(subj, class_args, numOfIterations)
     
     results.testSubjectName = subj.header.id;
     results.crossValidationArgs = class_args;
+    results.classificationGroups = subj.selectors{1,1}.mat;
     results.successTrainings = zeros(numOfIterations, numOfTests);
     results.accuracy = zeros(numOfIterations, numOfTests);
         
