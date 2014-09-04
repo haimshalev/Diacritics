@@ -1,6 +1,17 @@
 function [subj] = CreateXRunMats(subj)
     
     global globalVars;
+    
+    % if we don't working within runs don't work with this method and
+    % return
+    if ~strcmp(globalVars.testsBuildMethod, 'OneRun')
+        return;
+    end
+    
+    subj = ResetInternalTestRuns(subj);
+    % update the selectors to the tested conds
+    subj = updateSelectors(subj, 'conds_sh3', [1 2]);
+    
     if strcmp(globalVars.xRunMethod, 'nMinusOne')
         subj = CreateNMinusOneXRuns(subj);
     elseif strcmp(globalVars.xRunMethod, 'RandomPartitions')
@@ -11,11 +22,14 @@ function [subj] = CreateXRunMats(subj)
     
     % now, create selector indices for the n different iterations of
     % the nminusone
-    subj = remove_object(subj,'selector','runs_xval_1');
+    subj = RemoveXRuns(subj);
     args.ignore_runs_zeros = true;
     args.ignore_jumbled_runs = true;
     subj = create_xvalid_indices(subj,'runs',args);
-       
+    
+    % update the selectors to the tested conds
+    subj = updateSelectors(subj, 'conds_sh3', [1 2]);
+ 
 end
 
 function subj = CreateNMinusOneXRuns(subj)

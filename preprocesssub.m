@@ -8,6 +8,9 @@ function subj = preprocesssub(sub , runIdx)
     else
         error('Unkown testsBuildMethod value. Please use OneRun or EntireRuns strings');
     end
+    
+    % update the selectors to the tested conds
+    subj = updateSelectors(subj, 'conds_sh3', [1 2]);
 
 end
 
@@ -49,11 +52,11 @@ function subj = preprocesssubForOneTest(sub , runIdx)
 
     % now, create selector indices for the n different iterations of
     % the nminusone
-    subj = create_xvalid_indices(subj,'runs');
-    runs = get_mat(subj, 'selector', 'runs_xval_1');
-    runs = ones(size(runs));
-    subj = set_mat(subj, 'selector', 'runs_xval_1', runs);
+    subj = ResetInternalTestRuns(subj);
 
+    % remove all the TRs of the untested conditions, remove all the non tested conditions
+    subj = updateSelectors(subj , 'conds_conv', globalVars.chosenConditions);
+    
     % remove all the non tested conditions
     subj = removeUnUsedConditions(subj, globalVars.chosenConditions);
 
@@ -64,11 +67,4 @@ function subj = preprocesssubForOneTest(sub , runIdx)
     % Run GLM (3dDeconvolve) to use voxel selection later - with this feature selection we
     % can convolve our regressors
     subj = RunGLM(subj , runIdx);
-
-    % remove all the TRs of the untested conditions, remove all the non tested conditions
-    subj = updateSelectors(subj , 'conds_sh3', globalVars.chosenConditions);
-
-    % create the new xRunMatrices
-    subj = CreateXRunMats(subj);
-
 end

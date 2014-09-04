@@ -28,8 +28,7 @@ if needToInitialize == true
         initialSubj = initsub(initialSubj, runIdx);  
         subjectStatistics = gatherStatistics(initialSubj);
         initialSubj = preprocesssub(initialSubj, runIdx);
-        initialSubj = updateSelectors(initialSubj, 'conds_sh3', [1 2]);
-
+        
         runsSubjects = [runsSubjects initialSubj];
     end
     
@@ -40,9 +39,13 @@ end
 
 trainResults = [];
 for runIdx = 1:length(runsSubjects)
+    
     % save the initialized subject stuct to HD
     subj = runsSubjects(runIdx);
 
+    % create the new xRunMatrices if needed
+    subj = CreateXRunMats(subj);
+    
     % run feature selection 
     subj = runFeatureSelection(subj);
 
