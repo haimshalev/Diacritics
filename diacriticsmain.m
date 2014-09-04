@@ -4,12 +4,9 @@
 %% initialization code
 
 % Get the global variables
-GlobalVars
-global projectName;
-global outputSubjectFileName;
-global outputTrainResultFileName;
-
+global globalVars;
 warning off
+globalVars = SetGlobalVars();
 needToInitialize = true;
 mvpa_add_paths;
 RemoveAllFilesFromFolder(true);
@@ -18,7 +15,7 @@ RemoveAllFilesFromFolder(true);
 if needToInitialize == true
     
     % initialize each subj run with a seperate subj object
-    [numberOfRuns runsSubjects] = getNumberOfSubjectsToCreate;
+    [numberOfRuns runsSubjects] = getNumberOfSubjectsToCreate();
     
     for runIdx = 1 : numberOfRuns
         
@@ -27,7 +24,7 @@ if needToInitialize == true
         % return an initialized subj structure
         % first param - the name of the db, second param - the structure name
         % (should be the name of the subject we work on)
-        initialSubj = init_subj(projectName,getSubjectObjectName(runIdx));
+        initialSubj = init_subj(globalVars.projectName,getSubjectObjectName(runIdx));
         initialSubj = initsub(initialSubj, runIdx);  
         subjectStatistics = gatherStatistics(initialSubj);
         initialSubj = preprocesssub(initialSubj, runIdx);
@@ -36,7 +33,7 @@ if needToInitialize == true
         runsSubjects = [runsSubjects initialSubj];
     end
     
-    save(outputSubjectFileName , 'runsSubjects', '-v7.3');
+    save(globalVars.outputSubjectFileName , 'runsSubjects', '-v7.3');
 end
 
 %% set the current test properties and train on the data
@@ -59,6 +56,5 @@ for runIdx = 1:length(runsSubjects)
     
 end
     
-save(outputTrainResultFileName, 'trainResults', '-v7.3');
-
+save(globalVars.outputTrainResultFileName, 'trainResults', '-v7.3');
 warning on

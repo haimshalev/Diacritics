@@ -1,23 +1,23 @@
 function filenames = getscanfiles(runIdx)
 
-    global scansPath;
+    global globalVars;
 
-    scanFiles = getallfiles(scansPath, '.BRIK');
+    scanFiles = getallfiles(globalVars.scansPath, '.BRIK');
     [numOfRequiredScanFiles fileIdxs] = getScanIdxs(scanFiles, runIdx);
     filenames = cell(1, numOfRequiredScanFiles);
     for idx = 1 : length(fileIdxs)
-        filenames{idx} = [scansPath scanFiles{fileIdxs(idx)}];
+        filenames{idx} = [globalVars.scansPath scanFiles{fileIdxs(idx)}];
     end
 end
 
 function [numOfRequiredScanFiles fileIdxs] = getScanIdxs(scanFiles, runIdx)
 
-    global testsBuildMethod;
+    global globalVars;
     
-    if strcmp(testsBuildMethod,'OneRun') == 1
+    if strcmp(globalVars.testsBuildMethod,'OneRun') == 1
         numOfRequiredScanFiles = 1;
         fileIdxs = [runIdx];
-    elseif strcmp (testsBuildMethod, 'EntireRuns') == 1
+    elseif strcmp (globalVars.testsBuildMethod, 'EntireRuns') == 1
         numOfRequiredScanFiles = length(scanFiles);
         fileIdxs = [1 : numOfRequiredScanFiles];
     else

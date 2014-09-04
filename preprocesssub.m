@@ -1,9 +1,9 @@
 function subj = preprocesssub(sub , runIdx)
 
-    global testsBuildMethod;
-    if strcmp(testsBuildMethod, 'OneRun')
+    global globalVars;
+    if strcmp(globalVars.testsBuildMethod, 'OneRun')
         subj = preprocesssubForOneTest(sub, runIdx);
-    elseif strcmp(testsBuildMethod,'EntireRuns')
+    elseif strcmp(globalVars.testsBuildMethod,'EntireRuns')
         subj = preprocesssubForEntireTests(sub);
     else
         error('Unkown testsBuildMethod value. Please use OneRun or EntireRuns strings');
@@ -13,7 +13,7 @@ end
 
 function subj = preprocesssubForEntireTests(sub)
 
-    global chosenConditions;
+    global globalVars;
 
     % we want to z-score the EPI data (called 'epi'),
     % individually on each run (using the 'runs' selectors)
@@ -24,10 +24,10 @@ function subj = preprocesssubForEntireTests(sub)
     subj = create_xvalid_indices(subj,'runs');
 
     % remove all the TRs of the untested conditions, remove all the non tested conditions
-    subj = updateSelectors(subj , 'conds_conv', chosenConditions);
+    subj = updateSelectors(subj , 'conds_conv', globalVars.chosenConditions);
 
     % remove all the non tested conditions
-    subj = removeUnUsedConditions(subj, chosenConditions);
+    subj = removeUnUsedConditions(subj, globalVars.chosenConditions);
 
     % Run Anova to use it with voxel selection later - with this method we
     % cannot use convolved regressors
@@ -41,7 +41,7 @@ end
 
 function subj = preprocesssubForOneTest(sub , runIdx)
 
-    global chosenConditions;
+    global globalVars;
 
     % we want to z-score the EPI data (called 'epi'),
     % individually on each run (using the 'runs' selectors)
@@ -55,7 +55,7 @@ function subj = preprocesssubForOneTest(sub , runIdx)
     subj = set_mat(subj, 'selector', 'runs_xval_1', runs);
 
     % remove all the non tested conditions
-    subj = removeUnUsedConditions(subj, chosenConditions);
+    subj = removeUnUsedConditions(subj, globalVars.chosenConditions);
 
     % Run Anova to use it with voxel selection later - with this method we
     % cannot use convolved regressors
@@ -66,7 +66,7 @@ function subj = preprocesssubForOneTest(sub , runIdx)
     subj = RunGLM(subj , runIdx);
 
     % remove all the TRs of the untested conditions, remove all the non tested conditions
-    subj = updateSelectors(subj , 'conds_sh3', chosenConditions);
+    subj = updateSelectors(subj , 'conds_sh3', globalVars.chosenConditions);
 
     % create the new xRunMatrices
     subj = CreateXRunMats(subj);

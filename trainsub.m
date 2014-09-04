@@ -54,8 +54,7 @@ end
 
 function [subj results] = trainIteration(subj, class_args)
     
-    global currentFeaturesMaskName;
-    global performanceMethod;
+    global globalVars;
 
     % Classification
     
@@ -67,6 +66,6 @@ function [subj results] = trainIteration(subj, class_args)
     % now, run the classification multiple times, training and testing
     % on different subsets of the data on each iteratio
     % using the binary preformance function and the new regs vector
-    [subj results] = cross_validation(subj,'epi_z','classificationRegMat','runs_xval', currentFeaturesMaskName,class_args,'perfmet_functs',{performanceMethod}); 
+    [subj results] = cross_validation(subj,'epi_z','classificationRegMat','runs_xval', globalVars.currentFeaturesMaskName,class_args,'perfmet_functs',{globalVars.performanceMethod}); 
 
 end 

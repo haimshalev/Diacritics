@@ -2,16 +2,14 @@ function runsmat = getrunsmat(runIdx)
 
 files = getscanfiles(runIdx);
 
-diacriticsCount = 1;
-withoutDiacriticsCount = 1;
+%diacriticsCount = 1;
+%withoutDiacriticsCount = 1;
 
-global scanLength;
-global withDiacriticsScanFileNameLength;
-global withoutDiacriticsScanFileNameLegth;
+global globalVars;
 
 runsmat = [];
 for iFile = 1 : length(files)
-    runsmat = [runsmat iFile*ones(1,scanLength)];
+    runsmat = [runsmat iFile*ones(1,globalVars.scanLength)];
     
     %{ 
     path = files{iFile};

@@ -1,24 +1,21 @@
 function [ subj ] = RunGLM( subj , runIdx)
 
-    global isAnova;
-    global combinedScansPath;
-    global maskPath;
-    global testsBuildMethod;
+    global globalVars;
 
-    if (~isAnova)
+    if (~globalVars.isAnova)
         
         scanPath = getscanfiles(runIdx);
         
         % setting the statemap parameters
-        if strcmp(testsBuildMethod, 'OneRun')
+        if strcmp(globalVars.testsBuildMethod, 'OneRun')
             statmap_3d_arg.whole_func_name = scanPath{1};
-        elseif strcmp(testsBuildMethod,'EntireRuns')
-            statmap_3d_arg.whole_func_name = combinedScansPath;
+        elseif strcmp(globalVars.testsBuildMethod,'EntireRuns')
+            statmap_3d_arg.whole_func_name = globalVars.combinedScansPath;
         else
             error('Unkown testsBuildMethod value. Please use OneRun or EntireRuns strings');
         end
         
-        statmap_3d_arg.deconv_args.mask = maskPath;
+        statmap_3d_arg.deconv_args.mask = globalVars.maskPath;
         statmap_3d_arg.runs_selname = 'runs';
         statmap_3d_arg.deconv_args.polort = '2';
 
@@ -36,7 +33,7 @@ function [ subj ] = RunGLM( subj , runIdx)
        % If we seperating runs we don't have groups (only one run)
        % so to avoid warnings, Replace the group name with an individual
        % 3dDeconvolved name
-       if strcmp(testsBuildMethod, 'OneRun')
+       if strcmp(globalVars.testsBuildMethod, 'OneRun')
            subj.patterns{3}.name = 'epi_z_3dDeconvolve';
            subj.patterns{3}.group_name = '';
        end

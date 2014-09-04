@@ -14,11 +14,11 @@ end
 
 function sub = GetStavAfniWholeMask(sub)
 
-    global maskPath;
+    global globalVars;
     
     disp('Setting whole mask using Stav analyze whole mask');
     
-    maskpath = maskPath;
+    maskpath = globalVars.maskPath;
     
     sub = load_afni_mask(sub,'Subj-Mask', maskpath);
     

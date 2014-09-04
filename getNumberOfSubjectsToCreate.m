@@ -1,13 +1,12 @@
 function [ numOfSubjects subjectsArr ] = getNumberOfSubjectsToCreate()
 
-    global testsBuildMethod;
-    global scansPath;
+    global globalVars;
 
     subjectsArr = [];
     
-    if strcmp(testsBuildMethod, 'OneRun')
-        numOfSubjects = size(getallfiles(scansPath, '.BRIK'),2);
-    elseif strcmp(testsBuildMethod,'EntireRuns')
+    if strcmp(globalVars.testsBuildMethod, 'OneRun')
+        numOfSubjects = size(getallfiles(globalVars.scansPath, '.BRIK'),2);
+    elseif strcmp(globalVars.testsBuildMethod,'EntireRuns')
         numOfSubjects = 1;
     else
         error('Unkown testsBuildMethod value. Please use OneRun or EntireRuns strings');

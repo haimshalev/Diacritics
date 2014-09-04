@@ -1,9 +1,9 @@
 function [subj] = CreateXRunMats(subj)
     
-    global xRunMethod;
-    if strcmp(xRunMethod, 'nMinusOne')
+    global globalVars;
+    if strcmp(globalVars.xRunMethod, 'nMinusOne')
         subj = CreateNMinusOneXRuns(subj);
-    elseif strcmp(xRunMethod, 'RandomPartitions')
+    elseif strcmp(globalVars.xRunMethod, 'RandomPartitions')
         subj = CreateRandomPartitionsXRuns(subj);
     else
         error('Unkown xRunMethod chosen');
@@ -29,12 +29,12 @@ end
 
 function subj = CreateRandomPartitionsXRuns(subj)
     
-    global xRunPartitions;
+    global globalVars;
     
     % create a partition runs
     runs = get_mat(subj, 'selector', 'runs_xval_1');
     randIndeces = randperm(count(runs));
-    partitionSize = ceil(count(runs)/xRunPartitions);
+    partitionSize = ceil(count(runs)/globalVars.xRunPartitions);
     
     currentPartition = 1;
     randPartitions = zeros(size(randIndeces));
