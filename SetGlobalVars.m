@@ -1,4 +1,4 @@
-function [ globalParams ] = SetGlobalVars(currentSubject, testBuildMethod, decisionMethod, xRunMethod, chosenConditions)
+function [ globalParams ] = SetGlobalVars(currentSubject, regressorsPath, testBuildMethod, decisionMethod, xRunMethod, chosenConditions)
 
     %% setting deafault argument values
 
@@ -6,6 +6,10 @@ function [ globalParams ] = SetGlobalVars(currentSubject, testBuildMethod, decis
         currentSubject = '001';
     end
 
+    if (~exist('regressorsPath', 'var') || isempty(regressorsPath))
+        regressorsPath = 'Regressors/Subjects 001-004/WithoutDiacritics/';
+    end
+    
     if (~exist('testBuildMethod','var') || isempty(testBuildMethod))
         testBuildMethod = 'OneRun';
     end
@@ -49,7 +53,7 @@ function [ globalParams ] = SetGlobalVars(currentSubject, testBuildMethod, decis
 
     %% regressors properties
 
-    globalParams.regressorsPath = [globalParams.dataDir 'Regressors/WithoutDiacritics/'];
+    globalParams.regressorsPath = [globalParams.dataDir regressorsPath];
 
     globalParams.conditionNames = {'M', 'R', 'MD', 'RD', 'B', 'WL'};
 
