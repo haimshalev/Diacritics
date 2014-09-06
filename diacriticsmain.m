@@ -79,6 +79,7 @@ for i = 1 : length(subjectsNames)
 
         save(globalVars.outputTrainResultFileName, 'trainResults', '-v7.3');
         warning on
+        RemoveAllFilesFromFolder(false);
         clear('runsSubjects');
         clear('trainResults');
         clc
