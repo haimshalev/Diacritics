@@ -1,4 +1,4 @@
-function [ avgResults, allTests ] = AvgResultsOverSubjects( input_args )
+function [ avgResults, allTests ] = AvgResultsOverSubjects( regString )
 
     globalVars  = SetGlobalVars();
     
@@ -12,7 +12,7 @@ function [ avgResults, allTests ] = AvgResultsOverSubjects( input_args )
     trainResultsFileNames = {trainResultsFileNames.name};
     
     % take only the ones needed
-    regExp = regexptranslate('wildcard', 'sub* OneRun Conds 1  2 IsAnova 0 decisionMethod binary xRun nMinusOne.mat');
+    regExp = regexptranslate('wildcard', regString);
     requiredFiles = regexp(trainResultsFileNames, regExp, 'match');
     requiredFiles(cellfun('isempty',requiredFiles))= [];
     
@@ -47,12 +47,12 @@ function [avgTrainResults] = InitializeAvgTrainResultsObj(globalVars)
     %   for diacritics : AD1 AD2 BD1 BD2
     %   for withoutDiacritics : A1 A2 B1 B2
     if (strcmp(globalVars.testsBuildMethod, 'OneRun'))
-        avgTrainResults = cell(1,4);
+        avgTrainResults = struct([]);
         
     % every 'EntireRuns' testresults object got only 1 cell (all the
     % tests are used together)
     elseif strcmp(globalVars.testsBuildMethod, 'EntireRuns')
-        avgTrainResults = [];
+        avgTrainResults = struct;
     else
         error('Unkown testsBuildMethod value');
     end
