@@ -5,6 +5,8 @@ function subj = preprocesssub(sub , runIdx)
         subj = preprocesssubForOneTest(sub, runIdx);
     elseif strcmp(globalVars.testsBuildMethod,'EntireRuns')
         subj = preprocesssubForEntireTests(sub);
+    elseif strcmp(globalVars.testsBuildMethod,'ScrambledEntireRuns')
+        subj = preprocesssubForEntireTests(sub);
     else
         error('Unkown testsBuildMethod value. Please use OneRun or EntireRuns strings');
     end

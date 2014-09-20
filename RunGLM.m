@@ -11,6 +11,8 @@ function [ subj ] = RunGLM( subj , runIdx)
             statmap_3d_arg.whole_func_name = scanPath{1};
         elseif strcmp(globalVars.testsBuildMethod,'EntireRuns')
             statmap_3d_arg.whole_func_name = globalVars.combinedScansPath;
+        elseif strcmp(globalVars.testsBuildMethod,'ScrambledEntireRuns')
+            statmap_3d_arg.whole_func_name = globalVars.combinedScansPath;
         else
             error('Unkown testsBuildMethod value. Please use OneRun or EntireRuns strings');
         end

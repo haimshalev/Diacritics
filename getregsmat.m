@@ -42,6 +42,9 @@ function [numOfRequiredRegFiles fileIdxs] = getRegsIdxs(RegFiles, runIdx)
     elseif strcmp (globalVars.testsBuildMethod, 'EntireRuns') == 1
         numOfRequiredRegFiles = length(RegFiles);
         fileIdxs = [1 : numOfRequiredRegFiles];
+    elseif strcmp (globalVars.testsBuildMethod, 'ScrambledEntireRuns') == 1
+        numOfRequiredRegFiles = length(RegFiles);
+        fileIdxs = [1 : numOfRequiredRegFiles];
     else
         error('Unkown testBuildMethod. Please use one of the two : OneRun or EntireRuns strings');
     end

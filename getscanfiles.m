@@ -20,6 +20,9 @@ function [numOfRequiredScanFiles fileIdxs] = getScanIdxs(scanFiles, runIdx)
     elseif strcmp (globalVars.testsBuildMethod, 'EntireRuns') == 1
         numOfRequiredScanFiles = length(scanFiles);
         fileIdxs = [1 : numOfRequiredScanFiles];
+    elseif strcmp (globalVars.testsBuildMethod, 'ScrambledEntireRuns') == 1
+        numOfRequiredScanFiles = length(scanFiles);
+        fileIdxs = [1 : numOfRequiredScanFiles];
     else
         error('Unkown testBuildMethod. Please use one of the two : OneRun or EntireRuns strings');
     end

@@ -22,7 +22,7 @@ summarize(subj)
 % initialize the selectors object, then read in the contents
 % for it from a file, and set them into the object
 subj = init_object(subj,'selector','runs');
-runs = getrunsmat(runIdx);
+runs = getrunsmat(runIdx,subj);
 subj = set_mat(subj,'selector','runs',runs);
 summarize(subj)
 

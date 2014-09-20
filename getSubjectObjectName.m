@@ -6,6 +6,8 @@ function [ name ] = getSubjectObjectName( runIdx )
         name = [globalVars.subjectName '_run' int2str(runIdx)];
     elseif strcmp(globalVars.testsBuildMethod, 'EntireRuns') == 1
         name = globalVars.subjectName;
+    elseif strcmp(globalVars.testsBuildMethod, 'ScrambledEntireRuns') == 1
+        name = globalVars.subjectName;
     else
         error('Unkown testBuildMethod. Please use one of the two : OneRun or EntireRuns strings');
     end

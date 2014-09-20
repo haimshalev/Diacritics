@@ -7,17 +7,32 @@ global globalVars;
 mvpa_add_paths;
 RemoveAllFilesFromFolder(true);
 
-% all the things we want to check
+%% Setting all the things we want to check
+
 subjectsNames = {'001' '002' '003' '004' '007' '008' '009' '010' '011'};
-regressorsNames = {'Regressors/Subjects 001-004/WithoutDiacritics/' 'Regressors/Subjects 001-004/WithoutDiacritics/' ...
+
+regressorsWithoutDiacriticsNames = {
+                   'Regressors/Subjects 001-004/WithoutDiacritics/' 'Regressors/Subjects 001-004/WithoutDiacritics/' ...
                    'Regressors/Subjects 001-004/WithoutDiacritics/' 'Regressors/Subjects 001-004/WithoutDiacritics/' ...
                    'Regressors/Subjects 006-012/WithoutDiacritics/' 'Regressors/Subjects 006-012/WithoutDiacritics/' ...
                    'Regressors/Subjects 006-012/WithoutDiacritics/' 'Regressors/Subjects 006-012/WithoutDiacritics/' ...
-                   'Regressors/Subjects 006-012/WithoutDiacritics/'};
-testBuildMethods = {'OneRun' 'EntireRuns' 'OneRun'};
-xRunMethod = {'RandomPartitions' 'nMinusOne' 'nMinusOne'};
+                   'Regressors/Subjects 006-012/WithoutDiacritics/' ...
+                   };
+regressorsDiacriticsNames = {
+                   'Regressors/Subjects 001-004/Diacritics/' 'Regressors/Subjects 001-004/Diacritics/' ...
+                   'Regressors/Subjects 001-004/Diacritics/' 'Regressors/Subjects 001-004/Diacritics/' ...
+                   'Regressors/Subjects 006-012/Diacritics/' 'Regressors/Subjects 006-012/Diacritics/' ...
+                   'Regressors/Subjects 006-012/Diacritics/' 'Regressors/Subjects 006-012/Diacritics/' ...
+                   'Regressors/Subjects 006-012/Diacritics/' ...
+                   };
+regressorsNames = regressorsWithoutDiacriticsNames;
 
-% iterate over all the subjects
+testBuildMethods = {'ScrambledEntireRuns' 'EntireRuns' 'OneRun' 'OneRun'};
+xRunMethod = {'nMinusOne' 'nMinusOne' 'nMinusOne' 'RandomPartitions'};
+
+%% start running
+
+%iterate over all the subjects
 for i = 1 : length(subjectsNames)
     
     % iterate over all the test methods
@@ -26,7 +41,7 @@ for i = 1 : length(subjectsNames)
         % Get the global variables
 
         warning off
-        globalVars = SetGlobalVars(subjectsNames{i}, regressorsNames{i}, testBuildMethods{j}, 'binary', xRunMethod{j}, [1 2])
+        globalVars = SetGlobalVars(subjectsNames{i}, regressorsNames{i}, testBuildMethods{j}, 'binary', xRunMethod{j}, [1 2]) 
         needToInitialize = true;
 
         %% initialize subjects
@@ -44,7 +59,6 @@ for i = 1 : length(subjectsNames)
                 % (should be the name of the subject we work on)
                 initialSubj = init_subj(globalVars.projectName,getSubjectObjectName(runIdx));
                 initialSubj = initsub(initialSubj, runIdx);  
-                subjectStatistics = gatherStatistics(initialSubj);
                 initialSubj = preprocesssub(initialSubj, runIdx);
 
                 runsSubjects = [runsSubjects initialSubj];
@@ -63,6 +77,9 @@ for i = 1 : length(subjectsNames)
 
             % create the new xRunMatrices if needed
             subj = CreateXRunMats(subj);
+            
+            % scramble runs 
+            subj = ScrambleRuns(subj);
 
             % run feature selection 
             subj = runFeatureSelection(subj);

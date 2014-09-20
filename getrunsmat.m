@@ -1,4 +1,4 @@
-function runsmat = getrunsmat(runIdx)
+function runsmat = getrunsmat(runIdx,subj)
 
 files = getscanfiles(runIdx);
 
@@ -8,9 +8,11 @@ files = getscanfiles(runIdx);
 global globalVars;
 
 runsmat = [];
-for iFile = 1 : length(files)
-    runsmat = [runsmat iFile*ones(1,globalVars.scanLength)];
-    
+
+
+    for iFile = 1 : length(files)
+        runsmat = [runsmat iFile*ones(1,globalVars.scanLength)];
+    end  
     %{ 
     path = files{iFile};
     [a,name,b] = fileparts(path);
@@ -25,8 +27,4 @@ for iFile = 1 : length(files)
     else error('wrong scan file name');
     end
     %}
-    
-    
-end
-
 end

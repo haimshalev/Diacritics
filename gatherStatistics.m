@@ -7,8 +7,7 @@ function [ subjectStatistics ] = gatherStatistics( subj )
     numOfConditions = size(regressorMat, 1);
        
     % get the number of tests
-    selectorsMat = subj.selectors{1,1}.mat;
-    numOfTests = max(selectorsMat);
+    numOfTests = length(getscanfiles(1));
     
     subjectStatistics.CounterConditions = zeros(numOfConditions,numOfTests);
     
@@ -16,7 +15,8 @@ function [ subjectStatistics ] = gatherStatistics( subj )
     for conditionIdx = 1 : numOfConditions
         for testIdx = 1 : numOfTests
             currentCondition = regressorMat(conditionIdx, :);
-            subjectStatistics.CounterConditions(conditionIdx, testIdx) = count(currentCondition(selectorsMat == testIdx));
+            currentCondition = currentCondition((testIdx * 171 - 170): testIdx*171);
+            subjectStatistics.CounterConditions(conditionIdx, testIdx) = count(currentCondition);
         end
     end
 

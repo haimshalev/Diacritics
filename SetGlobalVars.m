@@ -33,7 +33,8 @@ function [ globalParams ] = SetGlobalVars(currentSubject, regressorsPath, testBu
     globalParams.subjectName = ['sub' globalParams.currentSubject];
     globalParams.dataDir = '/home/haimshalev/Diacritics/Data/';
 
-    % how to create the subjects objects. The values are : OneRun/EntireRuns
+    % how to create the subjects objects. The values are :
+    % OneRun/EntireRuns/ScrambledEntireRuns
     globalParams.testsBuildMethod = testBuildMethod;
 
     %% mask properties

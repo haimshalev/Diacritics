@@ -8,6 +8,8 @@ function [ numOfSubjects subjectsArr ] = getNumberOfSubjectsToCreate()
         numOfSubjects = size(getallfiles(globalVars.scansPath, '.BRIK'),2);
     elseif strcmp(globalVars.testsBuildMethod,'EntireRuns')
         numOfSubjects = 1;
+    elseif strcmp(globalVars.testsBuildMethod,'ScrambledEntireRuns')
+        numOfSubjects = 1;        
     else
         error('Unkown testsBuildMethod value. Please use OneRun or EntireRuns strings');
     end

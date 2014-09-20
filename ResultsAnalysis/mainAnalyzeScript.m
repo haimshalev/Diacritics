@@ -1,12 +1,16 @@
 regStrings = { 'sub* OneRun Conds 1  2 IsAnova 0 decisionMethod binary xRun RandomPartitions.mat'
                'sub* OneRun Conds 3  4 IsAnova 0 decisionMethod binary xRun RandomPartitions.mat'
                'sub* EntireRuns Conds 1  2 IsAnova 0 decisionMethod binary.mat'
-               'sub* EntireRuns Conds 3  4 IsAnova 0 decisionMethod binary.mat'};
+               'sub* EntireRuns Conds 3  4 IsAnova 0 decisionMethod binary.mat'
+               'sub* ScrambledEntireRuns Conds 1  2 IsAnova 0 decisionMethod binary.mat'
+               'sub* ScrambledEntireRuns Conds 3  4 IsAnova 0 decisionMethod binary.mat'};
 
 outputStrings = { 'conds12OneRunWithRandomPartitions'
                   'conds34OneRunWithRandeomPartitions'
                   'conds12EntireRuns'
-                  'conds34EntireRuns'};
+                  'conds34EntireRuns'
+                  'conds12ScrambledEntireRuns'
+                  'conds34ScrambledEntireRuns'};
               
 for stringIdx = 1 : length(regStrings)
 
