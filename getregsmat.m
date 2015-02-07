@@ -17,18 +17,17 @@ function [regsmat condnames] = getregsmat(runIdx)
 
         % if with diacritics
         if size(files{fileIdxs(iFile)}, 2) == globalVars.withDiacriticsScanFileNameLength
-           outputMatrix = [ zeros(2, size(outputMatrix,2)) ; outputMatrix];
+           %outputMatrix = [ zeros(2, size(outputMatrix,2)) ; outputMatrix];
+           condnames = globalVars.conditionNames([3 4 5 6]);
         % if without diacritics
         elseif size(files{fileIdxs(iFile)},2) == globalVars.withoutDiacriticsScanFileNameLength
-           outputMatrix = [outputMatrix(1:2,:) ; zeros(2,size(outputMatrix,2)) ; outputMatrix(3:4,:)];
+           %outputMatrix = [outputMatrix(1:2,:) ; zeros(2,size(outputMatrix,2)) ; outputMatrix(3:4,:)];
+           condnames = globalVars.conditionNames([1 2 4 6]);
         else error('unkown regressor file length');
         end
 
         regsmat = [regsmat outputMatrix];    
     end
-
-    %% set the condition names list
-    condnames = globalVars.conditionNames;
 
 end
 

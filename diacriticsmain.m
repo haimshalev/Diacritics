@@ -27,8 +27,8 @@ regressorsDiacriticsNames = {
                    };
 regressorsNames = regressorsWithoutDiacriticsNames;
 
-testBuildMethods = {'ScrambledEntireRuns' 'EntireRuns' 'OneRun' 'OneRun'};
-xRunMethod = {'nMinusOne' 'nMinusOne' 'nMinusOne' 'RandomPartitions'};
+testBuildMethods = {'EntireRuns' 'OneRun' 'OneRun', 'ScrambledEntireRuns'};
+xRunMethod = {'nMinusOne' 'nMinusOne' 'RandomPartitions' 'nMinusOne' };
 
 %% start running
 
