@@ -165,8 +165,8 @@ for r = 1:nRuns
     
     % The double-transpose is necessary, because the zscore function
     % doesn't allow you to specify which dimension to zscore along
-    pat(:,actives_this_run) = zscore_funct_hand(pat(:,actives_this_run)')';
-  
+    %pat(:,actives_this_run) = zscore_funct_hand(pat(:,actives_this_run)')';
+    pat(:,actives_this_run) = MyNormalize(pat(:,actives_this_run)')';
   end % any inactive?
     
 end % for runs
