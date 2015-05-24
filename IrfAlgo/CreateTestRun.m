@@ -4,6 +4,7 @@ clear
 lengthOfIRF = 5;
 baseline = 100;
 useTrend = true;
+numberOfRequiredTrials = 20;
 %% Set the condition IRFs
 
 % condition 1
@@ -14,13 +15,14 @@ numOfConditions = size(realIRFs, 1);
 realIRFs = reshape(realIRFs', [1, lengthOfIRF, numOfConditions]);
 
 %% set the stimulus function
-stim_func(1,:) = [0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0];
-stim_func(2,:) = [0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0];
 
-f = zeros(1, size(stim_func,2)); 
-for testedCondition = 1: numOfConditions
-    f = f + testedCondition .* stim_func(testedCondition, :);
+% create a random time course for each experiment
+f = zeros(1,3);
+for trialIdx = 1 : numberOfRequiredTrials
+    f = [ f (mod(trialIdx, 2) + 1)];
+    f = [f zeros(1,3)];
 end
+f = [f zeros(1,3)];
 
 %% convolve the stimuluts function with the IRF
 y = zeros(size(f));
@@ -43,13 +45,13 @@ y
 
 %% add white gauusian noise
 
-percent=.08;
+percent=.4;
 
 noise = zeros(size(y));
 noiseY = zeros(size(y));
 for i=1 :length(y)
        val = y(i);
-       smallPerc = val * percent ; % 1 percent noise add
+       smallPerc = val * percent ;
        noise(i) = smallPerc * [ rand(1) - 0.5 ]; % .*T
        noiseY(i) = val + noise(i) ; % small is very small 10e-9
 end
@@ -67,11 +69,13 @@ title('Generated Noise');
  
 subplot(3,1,3);
 plot(noiseY);
-title(['Signal + Noise for noisePercent= ',num2str(percent)]);
+title(['Signal + Noise for noiseMaxPercent= ',num2str(percent* 100)]);
 
 %% test classification
 
 classificationVec = ClassifyTestData(noiseY, f, realIRFs);
+
+accurracy = ((count(classificationVec == f) - count(classificationVec == 0)) * 100 ) / count(f)
 
 % try to choose the best classification for ech trial base on the
 % similarity measument
