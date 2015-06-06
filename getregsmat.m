@@ -22,7 +22,7 @@ function [regsmat condnames] = getregsmat(runIdx)
         % if without diacritics
         elseif size(files{fileIdxs(iFile)},2) == globalVars.withoutDiacriticsScanFileNameLength
            %outputMatrix = [outputMatrix(1:2,:) ; zeros(2,size(outputMatrix,2)) ; outputMatrix(3:4,:)];
-           condnames = globalVars.conditionNames([1 2 4 6]);
+           condnames = globalVars.conditionNames([1 2 5 6]);
         else error('unkown regressor file length');
         end
 

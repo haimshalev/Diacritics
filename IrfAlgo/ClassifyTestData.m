@@ -1,4 +1,4 @@
-function [ classificationVec ] = ClassifyTestData( testRun, timeCourse, irfDictionary)
+function [ classificationVec , confusionMartix ] = ClassifyTestData( testRun, timeCourse, irfDictionary)
 %CLASSIFYTESTDATA Summary will return the classification of the test run
 %matrix, 
 % input:
@@ -15,13 +15,23 @@ function [ classificationVec ] = ClassifyTestData( testRun, timeCourse, irfDicti
 % classificationVec - a time course vector with the classification of each
 %                     condition
 
+progressInterval = 2501;
 numOfVoxels = size(irfDictionary, 1);
-lengthOfIrf = size(irfDictionary, 2);
+lengthOfIrfOrig = size(irfDictionary, 2);
+lengthOfIrf = lengthOfIrfOrig;
 numOfConditions = size(irfDictionary, 3);
-
 classificationVec = zeros(size(timeCourse));
+confusionMartix = zeros(numOfConditions);
+
+% pad the measured data with zeros of size of the irf
+testRun = [testRun zeros(numOfVoxels, lengthOfIrf)];
+timeCourse = [timeCourse zeros(1, lengthOfIrf)];
 
 %% classification
+
+disp('starting classification procedure');
+fprintf('numberOfVoxels = %d, originalLengthOfIrfs = %d , trimmedIrfsLength = %d, numberOfConditions = %d, PlotInterval = %d\n', ...
+    numOfVoxels, lengthOfIrfOrig, lengthOfIrf, numOfConditions, progressInterval);
 
 % try to choose the best classification for ech trial base on the
 % similarity measument
@@ -30,33 +40,27 @@ classificationVec = zeros(size(timeCourse));
 for targetCondition = 1: numOfConditions
     %go over each trial of the current targetCondition
     for trialStartTrIdx = find(timeCourse == targetCondition)
-        % get the measured response matrix
-        measuredResponse = testRun(:, trialStartTrIdx : trialStartTrIdx + lengthOfIrf - 1);
+        disp(['classifying the window of trial ' num2str(trialStartTrIdx) ' of condition ' num2str(targetCondition)]);
+      
+        % extract the current window and classify it
+        measuredResponseWindow = testRun(:, trialStartTrIdx : trialStartTrIdx + lengthOfIrf - 1);
+        timeCourseWindow = timeCourse(trialStartTrIdx : trialStartTrIdx + lengthOfIrf - 1);
+        [classificationWindowVec] = ClassifyWindow(measuredResponseWindow, timeCourseWindow, irfDictionary);
         
-        % use cross correlation to check which condition best fit to the
-        % measured response
-        bestCrossCorreleationGrade = -1;
-        % go over each condition and check what is the condition that is
-        % most similar to the measured condition
-        for condition = 1 : numOfConditions
-            % get the response matrix for the current condition
-            approximatedResponseMatrix = irfDictionary(:,:,condition);
-            % sum the log probability of the cross correlation prob for all the voxels 
-            conditionGrade = 0;
-            for voxelIdx = 1: numOfVoxels
-                % get the measurment using cross correlation
-                conditionGrade = conditionGrade + log(max(xcorr(measuredResponse,approximatedResponseMatrix,'coeff')));
-                
-            end
-            % if the condition grade is the current max, set the current
-            % classification
-            if (conditionGrade > bestCrossCorreleationGrade)
-                classificationVec(trialStartTrIdx) = condition;
-                bestCrossCorreleationGrade = conditionGrade;
-            end
-        end
+        % choose the classification of the current trial to be the
+        % classification of the first TR in the extracted window
+        classificationVec(trialStartTrIdx) = classificationWindowVec(1);
+        
+        % maintain the confusion matrix
+        confusionMartix(targetCondition, classificationVec(trialStartTrIdx)) = confusionMartix(targetCondition, classificationVec(trialStartTrIdx)) + 1
+        disp([' -- chosen condition ' num2str(classificationVec(trialStartTrIdx)) ' while the true condition is ' num2str(targetCondition)]);
     end
 end % end of main for
- 
+
+% display the accurracy of the classification procedure
+classificationVec = [classificationVec zeros(1,lengthOfIrf)];
+accurracy = ((count(classificationVec == timeCourse) - count(classificationVec == 0)) * 100 ) / count(timeCourse);
+disp(['classification procedure was finished, accurracy = ' num2str(accurracy)]);
+
 end % end of function 
 
