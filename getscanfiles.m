@@ -2,7 +2,13 @@ function filenames = getscanfiles(runIdx)
 
     global globalVars;
 
-    scanFiles = getallfiles(globalVars.scansPath, '.BRIK');
+    if (globalVars.diacriticalSigns)
+        regex = '(dataset)[A-B](D)[1-2](+tlrc.BRIK)';
+    else
+        regex = '(dataset)[A-B][1-2](+tlrc.BRIK)';
+    end
+    
+    scanFiles = getallfiles(globalVars.scansPath, regex);
     [numOfRequiredScanFiles fileIdxs] = getScanIdxs(scanFiles, runIdx);
     filenames = cell(1, numOfRequiredScanFiles);
     for idx = 1 : length(fileIdxs)

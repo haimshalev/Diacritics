@@ -75,7 +75,7 @@ for diacriticalSignsIdx = 1 : length(withDiacritics)
                 % run feature selection
                 subj = runFeatureSelection(subj);
 
-                %SaveSelectedFeatures(subj, globalVars.diacriticalSigns, globalVars.outputFolderPath, globalVars.currentSubject, runs{runIdx});               
+                SaveSelectedFeatures(subj, globalVars.diacriticalSigns, globalVars.outputFolderPath, globalVars.currentSubject, runs{runIdx});+---                
 
                 summarize(subj)
 

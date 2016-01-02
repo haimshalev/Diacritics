@@ -13,7 +13,7 @@ function [] = RemoveAllFilesFromFolder(bNeedToAsk)
 
         % ask the use to remove all the files from the running folder
         if (bNeedToAsk)
-            result = input('The script will create temp files and need to remove all the files in the running folder. Press y to confirm\n');
+            result = input('The script will create temp files and need to remove all the files in the running folder. Press y to confirm\n','s');
         else
             result = 'y';
         end

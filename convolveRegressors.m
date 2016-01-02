@@ -6,5 +6,7 @@ subj = shift_regressors(subj,'conds','runs',3);
 % convlove with haemodynamic response function
 subj = convolve_regressors_afni(subj,'conds','runs','overwrite_if_exist',true,'binarize_thresh',0.5);
 
+% the convolve regressors create outpu files, so we just clear the folder
+RemoveAllFilesFromFolder(false);
 end
 

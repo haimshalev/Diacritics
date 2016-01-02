@@ -37,9 +37,9 @@ function [subj] = init_subj(exp_name,id,varargin)
 
 
 version = 3;
-created = datetime(true);
+created = datetime;
 
-defaults.subdir = sprintf('%s_%s_%s',exp_name,id,created);
+defaults.subdir = sprintf('%s_%s_%s',exp_name,id,datestr(created));
 defaults.username = '';
 args = propval(varargin,defaults);
 
@@ -53,7 +53,7 @@ subj.header     = [];
 
 header.experiment = exp_name;
 header.version    = version;
-header.history    = {sprintf('Initialized on %s',created)};
+header.history    = {sprintf('Initialized on %s',datestr(created))};
 header.created    = created;
 header.subdir     = args.subdir;
 header.username   = args.username;

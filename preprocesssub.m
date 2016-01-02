@@ -10,13 +10,6 @@ function subj = preprocesssub(sub , runIdx)
     else
         error('Unkown testsBuildMethod value. Please use OneRun or EntireRuns strings');
     end
-    
-    % remove all the TRs of the untested conditions, remove all the non tested conditions
-    subj = updateSelectors(subj , 'conds_sh3', globalVars.chosenConditions);
-
-    % remove all the non tested conditions
-    subj = removeUnUsedConditions(subj, globalVars.chosenConditions);
-
 end
 
 function subj = preprocesssubForEntireTests(sub)

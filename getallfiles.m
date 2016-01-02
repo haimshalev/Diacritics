@@ -1,6 +1,8 @@
-function files = getallfiles(directory, fileType)
+function files = getallfiles(directoryPath, regex)
 
-dirList = dir([directory '*' fileType]);
-files = {dirList.name};
-
+directory = dir(directoryPath);
+directory = directory(3:end,:);
+directories = {directory.name};
+passedFiles = regexp(directories, regex, 'match');
+files = directories(~cellfun('isempty', passedFiles));
 end

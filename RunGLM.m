@@ -40,6 +40,8 @@ function [ subj ] = RunGLM( subj , runIdx)
            subj.patterns{3}.group_name = '';
        end
        
+       % the deconvolve function create outpu files, so we just clear the folder
+        RemoveAllFilesFromFolder(false);
     end
 
 end

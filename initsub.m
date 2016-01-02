@@ -6,6 +6,11 @@ subj = setmask(subj);
 % EPI data from a BRIK file, keeping only the voxels active in the
 % mask (see above)
 raw_filenames = getscanfiles(runIdx);
+disp('loading afni patterns from paths:');
+for fileName = raw_filenames
+    disp(fileName);
+end
+
 subj = load_afni_pattern(subj,'epi','Subj-Mask',raw_filenames);
 summarize(subj)
 
@@ -28,5 +33,5 @@ summarize(subj)
 
 % convolve the reggressors
 subj = convolveRegressors(subj);
-    
+
 end

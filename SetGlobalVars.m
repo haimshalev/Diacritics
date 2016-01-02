@@ -1,13 +1,13 @@
-function [ globalParams ] = SetGlobalVars(currentSubject, regressorsPath, testBuildMethod, decisionMethod, xRunMethod, chosenConditions)
+function [ globalParams ] = SetGlobalVars(currentSubject, withDiacritics, testBuildMethod, decisionMethod, xRunMethod, chosenConditions)
 
     %% setting deafault argument values
 
     if (~exist('currentSubject','var') || isempty(currentSubject))
         currentSubject = '001';
     end
-
-    if (~exist('regressorsPath', 'var') || isempty(regressorsPath))
-        regressorsPath = 'Regressors/Subjects 001-004/WithoutDiacritics/';
+    
+    if (~exist('withDiacritics', 'var') || isempty(withDiacritics))
+        withDiacritics = true;
     end
     
     if (~exist('testBuildMethod','var') || isempty(testBuildMethod))
@@ -39,22 +39,25 @@ function [ globalParams ] = SetGlobalVars(currentSubject, regressorsPath, testBu
 
     %% mask properties
 
-    globalParams.maskPath = [globalParams.dataDir 'Mask/afnimask+tlrc'];
+    globalParams.masksFolder = [globalParams.dataDir 'Mask/'];
+    globalParams.maskPath = [globalParams.masksFolder 'afnimask+tlrc'];
 
     %% scans properties
 
-    globalParams.scansPath = [globalParams.dataDir 'Scans/ConvertedAfniDataWithout3dDeconvolveWithout3dRefit/WithoutDiacritics/' globalParams.currentSubject '/'];
-    globalParams.combinedScansPath = [globalParams.scansPath 'AllRuns/allRuns+tlrc'];
+    globalParams.scansPath = [globalParams.dataDir 'Scans/ConvertedAfniDataWithout3dDeconvolve/' globalParams.currentSubject '/'];
+    globalParams.diacriticalSigns = withDiacritics;
+    
+    if (withDiacritics)
+        globalParams.combinedScansPath = [globalParams.scansPath 'AllRuns/allRunsDiacritics+tlrc'];
+    else
+        globalParams.combinedScansPath = [globalParams.scansPath 'AllRuns/allRunsWithoutDiacritics+tlrc'];
+    end
 
     globalParams.scanLength = 171;
 
-    globalParams.withDiacriticsScanFileNameLength = 17;
-
-    globalParams.withoutDiacriticsScanFileNameLength = 16;
-
     %% regressors properties
 
-    globalParams.regressorsPath = [globalParams.dataDir regressorsPath];
+    globalParams.regressorsPath = [globalParams.dataDir 'Regressors/' globalParams.currentSubject '/'];
 
     globalParams.conditionNames = {'M', 'R', 'MD', 'RD', 'B', 'WL'};
 
@@ -116,13 +119,11 @@ function [ globalParams ] = SetGlobalVars(currentSubject, regressorsPath, testBu
     globalParams.trainResultsFolderPath = [ globalParams.outputFolderPath 'TrainResults/'];
 
     globalParams.outputSubjectFileName = [globalParams.subjectsFolderPath globalParams.subjectName ' ' ...
+                             'DiacriticalSigns '   num2str(withDiacritics) ' ' ...
                              globalParams.testsBuildMethod ' Conds ' int2str(globalParams.chosenConditions) ...
                              ' IsAnova ' int2str(globalParams.isAnova)];
 
-    globalParams.outputTrainResultFileName = [globalParams.trainResultsFolderPath globalParams.subjectName ' ' ...
-                             globalParams.testsBuildMethod ' Conds ' int2str(globalParams.chosenConditions) ...
-                             ' IsAnova ' int2str(globalParams.isAnova) ' decisionMethod ' ...
-                             globalParams.decisionMethod ];
+    globalParams.outputTrainResultFileName = [globalParams.outputSubjectFileName ' decisionMethod ' globalParams.decisionMethod ];
 
      if strcmp(globalParams.testsBuildMethod, 'OneRun')
          globalParams.outputTrainResultFileName = [globalParams.outputTrainResultFileName ' xRun ' globalParams.xRunMethod];

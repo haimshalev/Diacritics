@@ -79,7 +79,7 @@ obj.matsize = size([]);
 obj.group_name = '';
 obj.derived_from = '';
 obj.header.description = '';
-obj.created.datetime = datetime(true);
+obj.created.datetime = datetime;
 obj.created.dbstack = dbstack;
 
 % Deal with particular fields that are specific to different types

@@ -5,7 +5,12 @@ function [ numOfSubjects subjectsArr ] = getNumberOfSubjectsToCreate()
     subjectsArr = [];
     
     if strcmp(globalVars.testsBuildMethod, 'OneRun')
-        numOfSubjects = size(getallfiles(globalVars.scansPath, '.BRIK'),2);
+         if (globalVars.diacriticalSigns)
+            regex = '(dataset)[A-B](D)[1-2](+tlrc.BRIK)';
+        else
+            regex = '(dataset)[A-B][1-2](+tlrc.BRIK)';
+         end
+        numOfSubjects = size(getallfiles(globalVars.scansPath, regex),2);
     elseif strcmp(globalVars.testsBuildMethod,'EntireRuns')
         numOfSubjects = 1;
     elseif strcmp(globalVars.testsBuildMethod,'ScrambledEntireRuns')
