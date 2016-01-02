@@ -1,4 +1,4 @@
-function [ classificationVec ] = ClassifyWindow( testWindow, timeCourse, irfDictionary)
+function [ classificationVec ] = ClassifyWindow( testWindow, timeCourse, irfDictionary, testedConditions, previousWindowTRs, startTrIdx, endTrIdx)
 %CLASSIFYTESTDATA Summary will return the best permutation classification
 %for the whole window
 %matrix, 
@@ -12,36 +12,39 @@ function [ classificationVec ] = ClassifyWindow( testWindow, timeCourse, irfDict
 % irfDictionary - numberOfVoxels X neuralResponseLength X conditions matrix
 %                 which will hold the asstimated neural response of each
 %                 voxel for each type of condition
+% previousWindowTRs - a vector of size of windowLength that holds the relative TRs in which a
+%              specific condition was shown. The vector will have the
+%              number of the condition or zero of no condition was shown in
+%              the specified TR. This window represents the past events
+%              that can effect the current window
+%  previousWindow - The measured data of the previous window so we can
+%               build or new measured data on it
 % output:
 % classificationVec - a time course vector with the classification of each
 %                     condition
 
 progressInterval = 2501;
 numOfVoxels = size(irfDictionary, 1);
-lengthOfIrfOrig = size(irfDictionary, 2);
-lengthOfIrf = lengthOfIrfOrig;
+lengthOfIrf = size(irfDictionary, 2);
 numOfConditions = size(irfDictionary, 3);
 classificationVec = zeros(size(timeCourse));
 
 % get the indexes of all the trials in this window
-trialsInWindowIdxs = find(timeCourse);
+trialsInWindowIdxs = find(timeCourse) + size(previousWindowTRs,2);
 
 % create the combinatios matrix of the trials in this window
-combinations = CreateCombinations(1:numOfConditions,length(trialsInWindowIdxs));
+combinations = CreateCombinations(1:numOfConditions,length(trialsInWindowIdxs), testedConditions);
 numOfCombinations = size(combinations,1);
 
-% get the measured response matrix
-measuredResponse = testWindow;
-
-% pad the measured data with zeros of size of the irf
-testWindow = [testWindow zeros(numOfVoxels, lengthOfIrf)];
-timeCourse = [timeCourse zeros(1, lengthOfIrf)];
+% get the measured response matrix and normalize it so the avg will be zero
+measuredResponse = testWindow - repmat(mean(testWindow,2), 1,size(testWindow,2));
 
 %% classification
 
 disp('starting classification procedure for a new window');
-fprintf('numberOfVoxels = %d, originalLengthOfIrfs = %d , trimmedIrfsLength = %d, numberOfConditions = %d, PlotInterval = %d\ntrialsInCurrentWindow = %d numberOfPermutations = %d', ...
-    numOfVoxels,lengthOfIrfOrig,lengthOfIrf,numOfConditions,progressInterval,size(trialsInWindowIdxs,1),numOfCombinations);
+tic
+fprintf('numberOfVoxels = %d, originalLengthOfIrfs = %d , testedconditiosn = %s, numberOfConditions = %d, PlotInterval = %d\ntrialsInCurrentWindow = %d numberOfPermutations = %d StartTr = %d , EndTr = %d\n', ...
+    numOfVoxels,lengthOfIrf,mat2str(testedConditions),numOfConditions,progressInterval,size(trialsInWindowIdxs,2),numOfCombinations, startTrIdx, endTrIdx);
 
 % try to choose the best classification for this window base on the
 % similarity measument
@@ -49,21 +52,22 @@ fprintf('numberOfVoxels = %d, originalLengthOfIrfs = %d , trimmedIrfsLength = %d
 %% new
       
 % create the irfs for each combination
-irfCombinations = zeros(size(testWindow,1), size(testWindow,2), numOfCombinations); % create the padded initialized mat
-
-% create a dictionary of the response for each combination
+SumGradesMat = zeros(numOfCombinations,numOfVoxels);
 for combinationIdx = 1 : numOfCombinations
-    
+       
+    % create a dictionary of the response for each combination
     % the current combination will determine which irf we need to create
     currentCombination = combinations(combinationIdx,:);
-
-    for trialIdx = 1 : length(trialsInWindowIdxs) % add each response of each condition in the current combination to the irf
-        currentCondition = currentCombination(trialIdx);
-        trialIndexInWindow = trialsInWindowIdxs(trialIdx);
-        irfCombinations(:,trialIndexInWindow : trialIndexInWindow + lengthOfIrf - 1,combinationIdx) = irfCombinations(:,trialIndexInWindow : trialIndexInWindow + lengthOfIrf - 1, combinationIdx) + irfDictionary(:,:,currentCondition);
-    end
+ 
+    irfCombination = CreateResponseForCombination(currentCombination, previousWindowTRs, trialsInWindowIdxs, irfDictionary);
+    transposedIrfCombination = irfCombination';
+    
+    % create a similarity grade of the current permutation to the measured
+    % data
+    SumGradesMat(combinationIdx,:) = diag(measuredResponse(:,startTrIdx:endTrIdx) * transposedIrfCombination(startTrIdx:endTrIdx,:)); % the indexes are here so we will be able easily start from the second tr if we want it
 end
 
+%{
 VecsMat = zeros(numOfCombinations + 1, lengthOfIrf);
 CurrentGradesMat = zeros(numOfCombinations,1);
 SumGradesMat = ones(numOfCombinations,1);
@@ -80,9 +84,6 @@ for voxelIdx = 1: numOfVoxels
     for combinationIdx = 1 : numOfCombinations
         % get the response for the specific voxel
         irfVec = irfCombinations(voxelIdx,1:lengthOfIrf,combinationIdx);
-        %bias the irf to be in the starting place of the
-        %measuredVec
-        irfVec = irfVec + (measuredVec(1) - irfVec(1));
         VecsMat(combinationIdx,:) = irfVec;
         CurrentGradesMat(combinationIdx) = (max(xcorr(measuredVec(2:end), irfVec(2:end), 'coeff')));
         SumGradesMat(combinationIdx) = CurrentGradesMat(combinationIdx) .* SumGradesMat(combinationIdx);
@@ -116,10 +117,40 @@ for voxelIdx = 1: numOfVoxels
     end
     fprintf('%d',voxelIdx);
 end
+%}
 
 % take the condition which maximied the grade
-[~, winnerCombination] = max(SumGradesMat);
+%first normalize the results mat to be between [-1:1]
+maxAbsolute = max(abs(SumGradesMat(:)));
+SumGradesMat = SumGradesMat./maxAbsolute;
+
+% take the winne using summing - add all the probabilities and get the max
+finalGrades = sum(SumGradesMat,2);
+[~, winnerCombination] = max(finalGrades);
+
+% take the winner combination using voting
+[~,winnerIndces]=max(SumGradesMat);
+h = hist(winnerIndces,length(testedConditions));
+[~, winnerClass] = max(h);
+winnerCombination = ((winnerClass -1 ) * (size(SumGradesMat,1) ./ length(testedConditions))) + 1;
+
 classificationVec(logical(timeCourse)) = combinations(winnerCombination,:);
 
+%% plotting the winner combination and the measured data
+   
+% create a dictionary of the response for each combination
+% the current combination will determine which irf we need to create
+currentCombination = combinations(winnerCombination,:);
+
+irfCombination = CreateResponseForCombination(currentCombination,previousWindowTRs, trialsInWindowIdxs, irfDictionary);
+
+for i = 2501 :50 :2500
+    plot([irfCombination(i,:) ; measuredResponse(i,:)]');
+    title(['voxel number ' num2str(i)]);
+    waitforbuttonpress 
+end
+
+disp('finished classifying window');
+toc
 end % end of function 
 

@@ -1,10 +1,9 @@
-function [ combinationMat ] = CreateCombinations( values, lengthOfCombination )
+function [ combinationMatResult ] = CreateCombinations( values, lengthOfCombination , testedConditions)
 %CREATECOMBINATIONS Summary of this function goes here
 %   Detailed explanation goes here
 
 combinationMat = [];
 numOfValues = length(values);
-sizeOfCombinationMat = power(numOfValues, lengthOfCombination);
 
 for columnIdx = 1 : lengthOfCombination
     column = [];
@@ -16,6 +15,11 @@ for columnIdx = 1 : lengthOfCombination
         end
     end
     combinationMat = [column combinationMat];
+end
+
+combinationMatResult = [];
+for testedCondition = testedConditions
+    combinationMatResult = [combinationMatResult ; combinationMat(combinationMat(:,1) == testedCondition,:)];
 end
 
 end
