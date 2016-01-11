@@ -10,9 +10,9 @@ RemoveAllFilesFromFolder(true);
 %% Setting all the things we want to check
 
 subjectsNames = {'001' '002' '003' '004' '007' '008' '009' '010' '011'};
-withDiacritics = {false true}; % false if we want to run on the scans without diacritics signs
-testBuildMethods = {'OneRun' 'EntireRuns'}; % {'EntireRuns' 'OneRun' 'OneRun', 'ScrambledEntireRuns'};
-xRunMethod = {'nMinusOne' 'nMinusOne'}; % {'nMinusOne' 'nMinusOne' 'RandomPartitions' 'nMinusOne' };
+diacriticalSignsIdx = {false true};
+withDiacritics = {'EntireRuns' 'OneRun' 'OneRun', 'ScrambledEntireRuns'};
+xRunMethod = {'nMinusOne' 'nMinusOne' 'RandomPartitions' 'nMinusOne' };
 
 %% start running
 
@@ -75,7 +75,7 @@ for diacriticalSignsIdx = 1 : length(withDiacritics)
                 % run feature selection
                 subj = runFeatureSelection(subj);
 
-                %SaveSelectedFeatures(subj, globalVars.diacriticalSigns, globalVars.outputFolderPath, globalVars.currentSubject, runs{runIdx});               
+                %SaveSelectedFeatures(subj, globalVars.diacriticalSigns, globalVars.outputFolderPath, globalVars.currentSubject, globalVars.testsBuildMethod);               
 
                 summarize(subj)
 
@@ -87,7 +87,7 @@ for diacriticalSignsIdx = 1 : length(withDiacritics)
 
             end
 
-            save(globalVars.outputTrainResultFileName, 'trainResults', '-v7.3');
+            %save(globalVars.outputTrainResultFileName, 'trainResults', '-v7.3');
             warning on
             RemoveAllFilesFromFolder(false);
             clear('runsSubjects');
