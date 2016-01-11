@@ -4,13 +4,15 @@ disp ('Permutation IRF algorithm');
 regressorsFolder = '/home/haimshalev/Diacritics/Data/Regressors';
 scansFolder = '/home/haimshalev/Diacritics/Data/Scans/ScansMatlabMatrices';
 maskPath = '/home/haimshalev/Diacritics/Data/Mask/mask.mat';
-featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/Features';
+featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksSubjectLevelCrossValidation';
 
 % for run level use
-irfDictionariesFolder = '/home/Data/Tali_Data/DiacriticsFramework/HaimShalevCode/DiacriticsIRFs_09.12.15/OutputFolder';
+%irfDictionariesFolder = '/home/Data/Tali_Data/DiacriticsFramework/HaimShalevCode/DiacriticsIRFs_09.12.15/OutputFolderRunLevel';
+
 % for subject level use
-irfDictionariesFolder = '/home/haimshalev/Diacritics/Data/IRFs/OutputFolderSubjectLevel/';
+%irfDictionariesFolder = '/home/haimshalev/Diacritics/Data/IRFs/OutputFolderSubjectLevel/';
 irfDictionariesFolder = '/home/haimshalev/Diacritics/Data/IRFs/OutputFolderSubjectLevelCrossValidation';
+%irfDictionariesFolder = '/home/Data/Tali_Data/DiacriticsFramework/HaimShalevCode/DiacriticsIRFs_09.12.15/OutputFolderRunLevelCrossRun';
 
 % get all the subjects
 subjects = GetDirectoriesInPath(scansFolder, '[0-9]{3,3}');
@@ -43,10 +45,8 @@ for subjectIdx = 1 : numel(subjects)
             % test all the previous size windows from 1 tr to the size of
             % the IRf
             for previousWindowSize = 1 : size(irfDictionary, 2)
-                %for startTr = 1 : size(irfDictionary,2)
-                for startTr = 3 : 3
-                    %for endTr = startTr : size(irfDictionary,2)
-                    for endTr = 10 : 10
+                for startTr = 1 : size(irfDictionary,2)
+                    for endTr = startTr : size(irfDictionary,2)
                         % classify the data
                         disp(['Classifying data of subject ' subject 'run ' run 'irfLength ' irfFileLengthFolder]);
                         [classificationRes, confusionMatrix] = ClassifyData(scans, regressors, irfDictionary, [1 2], previousWindowSize, startTr, endTr);

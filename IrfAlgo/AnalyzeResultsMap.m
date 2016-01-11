@@ -1,7 +1,7 @@
 function [] = AnalyzeResultsMap( resultsMap )
 clc
 
-maskingConditions = {[1 2 3 4], [1 2 3], [1 2], 4};
+maskingConditions = {[1 2]};
 
 for conditionsIdx = 1 : numel(maskingConditions)
     

@@ -24,7 +24,6 @@ function [ classificationVec ] = ClassifyWindow( testWindow, timeCourse, irfDict
 %                     condition
 
 progressInterval = 2501;
-numOfVoxels = size(irfDictionary, 1);
 lengthOfIrf = size(irfDictionary, 2);
 numOfConditions = size(irfDictionary, 3);
 classificationVec = zeros(size(timeCourse));
@@ -38,7 +37,11 @@ numOfCombinations = size(combinations,1);
 
 % get the measured response matrix and normalize it so the avg will be zero
 measuredResponse = testWindow - repmat(mean(testWindow,2), 1,size(testWindow,2));
+removedNeurons = find(std(measuredResponse') < 10);
+measuredResponse(removedNeurons,:) = [];
+measuredResponseNorms = arrayfun(@(idx) norm(measuredResponse(idx,:)), 1:size(measuredResponse,1));
 
+numOfVoxels = size(measuredResponse, 1);
 %% classification
 
 disp('starting classification procedure for a new window');
@@ -60,6 +63,9 @@ for combinationIdx = 1 : numOfCombinations
     currentCombination = combinations(combinationIdx,:);
  
     irfCombination = CreateResponseForCombination(currentCombination, previousWindowTRs, trialsInWindowIdxs, irfDictionary);
+    irfCombination(removedNeurons,:) = [];
+    irfCombinationNorms = arrayfun(@(idx) norm(irfCombination(idx,:)), 1:size(irfCombination,1));
+    irfCombination = irfCombination .* repmat((measuredResponseNorms ./ irfCombinationNorms)', [1,lengthOfIrf]);
     transposedIrfCombination = irfCombination';
     
     % create a similarity grade of the current permutation to the measured
@@ -127,6 +133,12 @@ SumGradesMat = SumGradesMat./maxAbsolute;
 % take the winne using summing - add all the probabilities and get the max
 finalGrades = sum(SumGradesMat,2);
 [~, winnerCombination] = max(finalGrades);
+
+%Max(mean(Sum over all class combinations))
+%m(1) = mean(finalGrades(1:(length(finalGrades) ./ length(testedConditions))));
+%m(2) = mean(finalGrades(((length(finalGrades)./ length(testedConditions)) + 1):end));
+%[~, winnerClass]= max(m);
+%winnerCombination = ((winnerClass -1 ) * (size(SumGradesMat,1) ./ length(testedConditions))) + 1;
 
 % take the winner combination using voting
 [~,winnerIndces]=max(SumGradesMat);
