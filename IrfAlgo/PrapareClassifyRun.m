@@ -80,5 +80,33 @@ disp(['masking the scans with only the ' num2str(count(featuresMask)) ' selected
 scans = scans(featuresMask,:);
 disp(['scans was masked, current size ' mat2str(size(scans))]);
 
+% deTrend the runs
+disp('De trending each voxel run values: removes a continuous , piecewise linear treand');
+detrendScans = zeros(size(scans));
+
+plotDeTrendedScans = false;
+if (plotDeTrendedScans)
+    figure
+    t = 1:171;
+end
+
+for i = 1 : size(scans,1)
+    detrendScans(i,:) = detrend(scans(i,:),'linear',171);
+    
+    if (plotDeTrendedScans)
+        subplot(1,2,1);
+        plot(t,scans(i,:));
+        title(['scans of voxel ' num2str(i)]);
+
+        subplot(1,2,2);
+        plot(t,detrendScans(i,:));
+        title(['detrend scans of voxel ' num2str(i)]);
+        waitforbuttonpress
+    end
+end
+scans = detrendScans;
+
+disp('Scans where de trended');
+
 end
 

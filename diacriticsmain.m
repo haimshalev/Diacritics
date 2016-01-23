@@ -11,7 +11,7 @@ RemoveAllFilesFromFolder(true);
 
 subjectsNames = {'001' '002' '003' '004' '007' '008' '009' '010' '011'};
 diacriticalSignsIdx = {false true};
-withDiacritics = {'EntireRuns' 'OneRun' 'OneRun', 'ScrambledEntireRuns'};
+testBuildMethods = {'EntireRuns' 'OneRun' 'OneRun', 'ScrambledEntireRuns'};
 xRunMethod = {'nMinusOne' 'nMinusOne' 'RandomPartitions' 'nMinusOne' };
 
 %% start running
