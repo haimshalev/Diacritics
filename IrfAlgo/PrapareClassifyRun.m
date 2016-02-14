@@ -48,25 +48,6 @@ for conditionNum = 1 : size(outputMatrix,1)
     regressors = regressors + (conditionNum .* outputMatrix(conditionNum,:));
 end
 
-%% apply feature selection
-
-% load the mask and reshape it (for now 2500 features)
-featuresMaskPath = [featuresFolder '/' subject '/' run '/' 'featuresMask.mat'];
-disp(['loading chosen features (voxels) from file' featuresMaskPath]);
-load(featuresMaskPath);
-featuresMask = logical(reshape(featuresMask,numel(featuresMask), 1));
-disp(['features mask was loaded, number of features in the mask are ' num2str(count(featuresMask))]);
-
-% mask the features
-disp('masking the features with the master mask');
-featuresMask = featuresMask(logical(mask));
-disp(['featuresMask was masked , current size ' mat2str(size(featuresMask))]);
-
-% apply the mask to the irf dictionary
-disp('masking the irfDictionary with the features mask');
-irfDictionary = irfDictionary(featuresMask,:,:);
-disp(['irfDictionary was masked , current size ' mat2str(size(irfDictionary))]);
-
 %% read the masked scans
 
 % load the scans
@@ -75,12 +56,33 @@ disp(['loading scans from file:' scansPath]);
 load(scansPath);
 disp(['scans were loaded, the size of scans are ' mat2str(size(scans))]);
 
-% mask the scans with only the selected features
-disp(['masking the scans with only the ' num2str(count(featuresMask)) ' selected features']);
-scans = scans(featuresMask,:);
-disp(['scans was masked, current size ' mat2str(size(scans))]);
+%% apply feature selection
 
-% deTrend the runs
+% load the mask and reshape it (for now 2500 features)
+if (~strcmp(featuresFolder, ''))
+    featuresMaskPath = [featuresFolder '/' subject '/' run '/' 'featuresMask.mat'];
+    disp(['loading chosen features (voxels) from file' featuresMaskPath]);
+    load(featuresMaskPath);
+    featuresMask = logical(reshape(featuresMask,numel(featuresMask), 1));
+    disp(['features mask was loaded, number of features in the mask are ' num2str(count(featuresMask))]);
+
+    % mask the features
+    disp('masking the features with the master mask');
+    featuresMask = featuresMask(logical(mask));
+    disp(['featuresMask was masked , current size ' mat2str(size(featuresMask))]);
+
+    % apply the mask to the irf dictionary
+    disp('masking the irfDictionary with the features mask');
+    irfDictionary = irfDictionary(featuresMask,:,:);
+    disp(['irfDictionary was masked , current size ' mat2str(size(irfDictionary))]);
+
+    % mask the scans with only the selected features
+    disp(['masking the scans with only the ' num2str(count(featuresMask)) ' selected features']);
+    scans = scans(featuresMask,:);
+    disp(['scans was masked, current size ' mat2str(size(scans))]);
+end
+
+%% deTrend the runs
 disp('De trending each voxel run values: removes a continuous , piecewise linear treand');
 detrendScans = zeros(size(scans));
 
@@ -90,9 +92,10 @@ if (plotDeTrendedScans)
     t = 1:171;
 end
 
-for i = 1 : size(scans,1)
+parfor i = 1 : size(scans,1)
     detrendScans(i,:) = detrend(scans(i,:),'linear',171);
     
+    %{
     if (plotDeTrendedScans)
         subplot(1,2,1);
         plot(t,scans(i,:));
@@ -103,6 +106,7 @@ for i = 1 : size(scans,1)
         title(['detrend scans of voxel ' num2str(i)]);
         waitforbuttonpress
     end
+    %}
 end
 scans = detrendScans;
 

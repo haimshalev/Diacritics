@@ -39,10 +39,18 @@ numOfCombinations = size(combinations,1);
 measuredResponse = testWindow - repmat(mean(testWindow,2), 1,size(testWindow,2));
 removedNeurons = find(std(measuredResponse') < 10);
 measuredResponse(removedNeurons,:) = [];
+numOfVoxels = size(measuredResponse, 1);
+
+if (numOfVoxels == 0)
+    disp('There are no voxels to classify in the window, ignoring window and returning -1 classification');
+    classificationVec = -1;
+    return;
+end
+
 measuredResponseNorms = arrayfun(@(idx) norm(measuredResponse(idx,:)), 1:size(measuredResponse,1));
 
-numOfVoxels = size(measuredResponse, 1);
 %% classification
+
 
 disp('starting classification procedure for a new window');
 tic
@@ -56,7 +64,7 @@ fprintf('numberOfVoxels = %d, originalLengthOfIrfs = %d , testedconditiosn = %s,
       
 % create the irfs for each combination
 SumGradesMat = zeros(numOfCombinations,numOfVoxels);
-parfor combinationIdx = 1 : numOfCombinations
+for combinationIdx = 1 : numOfCombinations
        
     % create a dictionary of the response for each combination
     % the current combination will determine which irf we need to create
