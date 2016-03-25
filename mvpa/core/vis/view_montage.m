@@ -178,7 +178,7 @@ end
 
 if args.invisible
   curfig = figure('Visible','off')
-  dispf('Setting figure %i to be invisible',curfig);
+  dispf('Setting figure %i to be invisible',curfig.Name);
 else
   curfig = figure;
 end
@@ -190,7 +190,7 @@ mr_fmontage(anatvol,functvol,functmask, ...
 if ~isempty(args.printfig)
   % printfig(args.printfig)
   dispf('saveas %s',args.printfig);
-  saveas(curfig,args.printfig,'png');
+  saveas(curfig,[args.printfig ttext],'png');
 end
 
 
