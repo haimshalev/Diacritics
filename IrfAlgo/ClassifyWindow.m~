@@ -96,6 +96,10 @@ SumGradesMat = SumGradesMat./maxAbsolute;
 
 switch classificationMode
     case 'Summing'
+        
+        Grades = zeros(size(SumGradesMat,1), size(irfDictionary, 1));
+        mask = logical(repmat(neuronsMask, size(SumGradesMat,1), 1));
+        Grades(mask) = SumGradesMat;
 
         % take the winne using summing - add all the probabilities and get the max
         finalGrades = sum(SumGradesMat,2);
@@ -116,16 +120,8 @@ switch classificationMode
         
     case 'Classifier'
         
-        if (~exist('extraParams') || ~isfield(extraParams,'classifiers') || ~isfield(extraParams, 'classifierNeuronsMask'))
-            error('Missing extraParams to use classification with neural network classifier : extraParams should be a struct with this fields : {classifiers , classifierNeuronsMask}');
-        end
-        
-        classifiers = extraParams.classifiers;
-        classifierNeuronsMask = extraParams.classifierNeuronsMask;
-        
-        Grades = zeros(size(SumGradesMat,1), size(irfDictionary, 1));
-        mask = logical(repmat(neuronsMask, size(SumGradesMat,1), 1));
-        Grades(mask) = SumGradesMat;
+        , classifiers, classifierNeuronsMask
+        if (~exist('extraParams') || ~)
         numberOfCombinationsForEachCondition = size(SumGradesMat,1) ./ length(testedConditions);
         dataToClassify = Grades';
         dataToClassify(~classifierNeuronsMask,:) = [];
@@ -133,7 +129,8 @@ switch classificationMode
         %split the data and use different classifiers
         y = zeros(size(testedConditions));
         for conditionIdx = 1 : numel(testedConditions)
-            
+            %y(conditionIdx) = sum(classifiers{conditionIdx}(dataToClassify(:,(numberOfCombinationsForEachCondition) * (conditionIdx - 1) + 1 : (numberOfCombinationsForEachCondition) * (conditionIdx - 1) + numberOfCombinationsForEachCondition)));
+            %y(conditionIdx) = sum(classifiers{conditionIdx}(dataToClassify));
             classifierAnswers = classifiers{conditionIdx}(dataToClassify);
 
             classifierMask = ones(size(classifierAnswers)) * -1;
@@ -152,11 +149,23 @@ switch classificationMode
         [~, winnerClass] = min(y);
         winnerCombination = ((winnerClass -1 ) * (size(SumGradesMat,1) ./ length(testedConditions))) + 1;
         classificationVec(logical(timeCourse)) = combinations(winnerCombination,:);
+
+
+    end
         
     otherwise
         error('unkown classifying method');
 end
- 
+if (strcmp(classificationMode,'Summing'))
+    
+    
+   
+
+
+
+
+    
+
 %% plotting the winner combination and the measured data
    
 % create a dictionary of the response for each combination

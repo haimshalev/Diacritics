@@ -1,4 +1,4 @@
-function [ classificationVec , confusionMartix ] = ClassifyData( testRun, timeCourse, irfDictionary, testedConditions, previousWindowSize, startTr, endTr)
+function [ classificationVec , confusionMartix ] = ClassifyData( testRun, timeCourse, irfDictionary, testedConditions, previousWindowSize, startTr, endTr, classificationMode, extraParams)
 %ClassifyData Summary will return the classification of the test run
 %matrix, 
 % input:
@@ -56,7 +56,7 @@ for trialStartTrIdx = find(timeCourse)
     measuredResponseWindow = testRun(:, trialStartTrIdx : trialStartTrIdx + lengthOfIrf - 1);
     timeCourseWindow = timeCourse(trialStartTrIdx : trialStartTrIdx + lengthOfIrf - 1);
     previousWindowTRs = timeCourse(trialStartTrIdx - previousWindowSize : trialStartTrIdx - 1);
-    [classificationWindowVec] = ClassifyWindow(measuredResponseWindow, timeCourseWindow, irfDictionary, testedConditions, previousWindowTRs, startTr, endTr);
+    [classificationWindowVec] = ClassifyWindow(measuredResponseWindow, timeCourseWindow, irfDictionary, testedConditions, previousWindowTRs, startTr, endTr, classificationMode, extraParams);
 
     % choose the classification of the current trial to be the
     % classification of the first TR in the extracted window
