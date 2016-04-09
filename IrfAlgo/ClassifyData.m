@@ -68,28 +68,6 @@ for trialStartTrIdx = find(timeCourse)
     
 end
 
-%{
-for targetCondition = 1: numOfConditions
-    %go over each trial of the current targetCondition
-    for trialStartTrIdx = find(timeCourse == targetCondition)
-        disp(['classifying the window of trial ' num2str(trialStartTrIdx) ' of condition ' num2str(targetCondition)]);
-      
-        % extract the current window and classify it
-        measuredResponseWindow = testRun(:, trialStartTrIdx : trialStartTrIdx + lengthOfIrf - 1);
-        timeCourseWindow = timeCourse(trialStartTrIdx : trialStartTrIdx + lengthOfIrf - 1);
-        [classificationWindowVec] = ClassifyWindow(measuredResponseWindow, timeCourseWindow, irfDictionary);
-        
-        % choose the classification of the current trial to be the
-        % classification of the first TR in the extracted window
-        classificationVec(trialStartTrIdx) = classificationWindowVec(1);
-        
-        % maintain the confusion matrix
-        confusionMartix(targetCondition, classificationVec(trialStartTrIdx)) = confusionMartix(targetCondition, classificationVec(trialStartTrIdx)) + 1
-        disp([' -- chosen condition ' num2str(classificationVec(trialStartTrIdx)) ' while the true condition is ' num2str(targetCondition)]);
-    end
-end % end of main for
-%}
-
 % display the accurracy of the classification procedure
 classificationVec = [classificationVec zeros(1,lengthOfIrf)];
 toc

@@ -8,12 +8,12 @@ regressorsFolder = '/home/haimshalev/Diacritics/Data/Regressors';
 scansFolder = '/home/haimshalev/Diacritics/Data/Scans/ScansMatlabMatrices';
 maskPath = '/home/haimshalev/Diacritics/Data/Mask/mask.mat';
 testedConditions = [1 2];
-classificationMode = 'Classifier'; % 'Summing','Voting' or 'Classifier'
+classificationMode = 'Voting'; % 'Summing','Voting' or 'Classifier'
 
 %% Selected Features Configurations 
 
-%featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesRunLevel';
-featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksSubjectLevelCrossValidation';
+featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesRunLevel';
+%featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksSubjectLevelCrossValidation';
 featureSelectionMode = false;
 
 %% Selected Dictionary Configurations
@@ -33,15 +33,15 @@ irfDictionariesFolder = [irfsFolder 'OutputFolderSubjectLevelCrossValidation'];
 LearningFolder = 'LearningData/';
 
 % statistics gathering
-trainStatistics = false;
+trainStatistics = true;
 StatisticsLearningOutputFolder = [LearningFolder 'Statistics/']; 
 mkdir(StatisticsLearningOutputFolder);
 
 % neural network classifiers
-trainNeuralNetworkClassifiers = false;
-createDataForNeuralNetworkTraining = false;
-createNeuralNetworkClassifiers = false;
-hiddenNeuralNetworkNeurons = 10;
+trainClassifiers = false;
+createData = false;
+createClassifiers = false;
+hiddenNeurons = 10;
 NeuralNetworksLearningOutputFolder = [LearningFolder 'NeuralNetworkClassifier/'];
 mkdir(NeuralNetworksLearningOutputFolder);
                    
@@ -103,9 +103,9 @@ for subjectIdx = 1 : numel(subjects)
                  %% Training Mode
                    LearningOutputFolder = [NeuralNetworksLearningOutputFolder subject '/' run '/'];
                    mkdir(LearningOutputFolder);
-                   if (trainNeuralNetworkClassifiers)
+                   if (trainClassifiers)
                        
-                       if (createDataForNeuralNetworkTraining)
+                       if (createData)
                            % go over all the other training runs
                            trainingRuns = cell(3,1);
                            if (~isempty(strfind(run,'1')))
@@ -150,7 +150,7 @@ for subjectIdx = 1 : numel(subjects)
                            load([LearningOutputFolder 'dataPoints']);
                        end
                        
-                       if (createNeuralNetworkClassifiers)
+                       if (createClassifiers)
                            % train a stuck of classifiers, one for each condition, that each data point will
                            % be the vector x = [correlation to feature 1 : n]  and
                            % t = {1 , -1} where t will be 1 if this training vector
@@ -166,8 +166,8 @@ for subjectIdx = 1 : numel(subjects)
                                data = dataPoints{conditionIdx}(:, 1 : ceil(size(dataPoints{conditionIdx},2))); 
                                target = targets{conditionIdx}(:, 1 : ceil(size(targets{conditionIdx},2)));
                                data(~neuronsMask,:) = [];
-                               if (hiddenNeuralNetworkNeurons > 0)
-                                classifiers{conditionIdx} = fitnet(hiddenNeuralNetworkNeurons);
+                               if (hiddenNeurons > 0)
+                                classifiers{conditionIdx} = fitnet(hiddenNeurons);
                                else
                                 classifiers{conditionIdx} = perceptron;
                                end
@@ -175,13 +175,13 @@ for subjectIdx = 1 : numel(subjects)
 
                            end
 
-                           save([LearningOutputFolder 'classifiers' num2str(hiddenNeuralNetworkNeurons)], 'classifiers', 'tr');
+                           save([LearningOutputFolder 'classifiers' num2str(hiddenNeurons)], 'classifiers', 'tr');
                        else
-                           load([LearningOutputFolder 'classifiers' num2str(hiddenNeuralNetworkNeurons)]);
+                           load([LearningOutputFolder 'classifiers' num2str(hiddenNeurons)]);
                        end
                    else
                       load([LearningOutputFolder 'dataPoints']);
-                      load([LearningOutputFolder 'classifiers' num2str(hiddenNeuralNetworkNeurons)]); 
+                      load([LearningOutputFolder 'classifiers' num2str(hiddenNeurons)]); 
                    end    
                    
               %% Classification Code

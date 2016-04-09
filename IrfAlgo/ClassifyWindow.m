@@ -151,12 +151,14 @@ switch classificationMode
 
         [~, winnerClass] = min(y);
         winnerCombination = ((winnerClass -1 ) * (size(SumGradesMat,1) ./ length(testedConditions))) + 1;
-        classificationVec(logical(timeCourse)) = combinations(winnerCombination,:);
+        
         
     otherwise
         error('unkown classifying method');
 end
  
+classificationVec(logical(timeCourse)) = combinations(winnerCombination,:);
+
 %% plotting the winner combination and the measured data
    
 % create a dictionary of the response for each combination
