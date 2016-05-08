@@ -1,4 +1,4 @@
-function [scans, regressors, irfDictionary]  = PrapareClassifyRun(subject, run, irfFileLengthFolder, regressorsFolder, scansFolder, maskPath, featuresFolder, irfDictionariesFolder)
+function [scans, regressors, irfDictionary, featuresMask]  = PrapareClassifyRun(subject, run, irfFileLengthFolder, regressorsFolder, scansFolder, maskPath, featuresFolder, irfDictionariesFolder, featuresRun)
 %CLASSIFYRUN Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -58,27 +58,34 @@ disp(['scans were loaded, the size of scans are ' mat2str(size(scans))]);
 
 %% apply feature selection
 
+if nargin < 9
+    featuresRun = run;
+end
+
 % load the mask and reshape it (for now 2500 features)
 if (~strcmp(featuresFolder, ''))
-    featuresMaskPath = [featuresFolder '/' subject '/' run '/' 'featuresMask.mat'];
+    featuresMaskPath = [featuresFolder '/' subject '/' featuresRun '/' 'featuresMask.mat'];
     disp(['loading chosen features (voxels) from file' featuresMaskPath]);
-    load(featuresMaskPath);
-    featuresMask = logical(reshape(featuresMask,numel(featuresMask), 1));
-    disp(['features mask was loaded, number of features in the mask are ' num2str(count(featuresMask))]);
+    featuresMask = load(featuresMaskPath);
+    fieldNames = fieldnames(featuresMask);
+    featuresMask = getfield(featuresMask, fieldNames{1});
+    featuresMask = logical(featuresMask);
+    features = reshape(featuresMask,numel(featuresMask), 1);
+    disp(['features mask was loaded, number of features in the mask are ' num2str(count(features))]);
 
     % mask the features
     disp('masking the features with the master mask');
-    featuresMask = featuresMask(logical(mask));
-    disp(['featuresMask was masked , current size ' mat2str(size(featuresMask))]);
+    features = features(logical(mask));
+    disp(['featuresMask was masked , current size ' mat2str(size(features))]);
 
     % apply the mask to the irf dictionary
     disp('masking the irfDictionary with the features mask');
-    irfDictionary = irfDictionary(featuresMask,:,:);
+    irfDictionary = irfDictionary(features,:,:);
     disp(['irfDictionary was masked , current size ' mat2str(size(irfDictionary))]);
 
     % mask the scans with only the selected features
-    disp(['masking the scans with only the ' num2str(count(featuresMask)) ' selected features']);
-    scans = scans(featuresMask,:);
+    disp(['masking the scans with only the ' num2str(count(features)) ' selected features']);
+    scans = scans(features,:);
     disp(['scans was masked, current size ' mat2str(size(scans))]);
 end
 

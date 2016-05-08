@@ -12,8 +12,9 @@ classificationMode = 'Voting'; % 'Summing','Voting' or 'Classifier'
 
 %% Selected Features Configurations 
 
-featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesRunLevel';
+featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksForOneRun';
 %featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksSubjectLevelCrossValidation';
+%featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesUnionOrRunLevelsCrossValidation/';
 featureSelectionMode = false;
 
 %% Selected Dictionary Configurations
@@ -21,11 +22,11 @@ featureSelectionMode = false;
 irfsFolder = '/home/haimshalev/Diacritics/Data/IRFs/';
 
 % for run level use - 
-%irfDictionariesFolder = [irfsFolder 'OutputFolderRunLevel'];
+irfDictionariesFolder = [irfsFolder 'OutputFolderRunLevel'];
 
 % for subject level use
 %irfDictionariesFolder = [irfsFolder 'OutputFolderSubjectLevel'];
-irfDictionariesFolder = [irfsFolder 'OutputFolderSubjectLevelCrossValidation'];
+%irfDictionariesFolder = [irfsFolder 'OutputFolderSubjectLevelCrossValidation'];
 %irfDictionariesFolder = [irfsFolder 'OutputFolderRunLevelCrossRun'];
 
 %% Training Mode Configuration
@@ -33,15 +34,15 @@ irfDictionariesFolder = [irfsFolder 'OutputFolderSubjectLevelCrossValidation'];
 LearningFolder = 'LearningData/';
 
 % statistics gathering
-trainStatistics = true;
+trainStatistics = false;
 StatisticsLearningOutputFolder = [LearningFolder 'Statistics/']; 
 mkdir(StatisticsLearningOutputFolder);
 
 % neural network classifiers
-trainClassifiers = false;
-createData = false;
-createClassifiers = false;
-hiddenNeurons = 10;
+trainNeuralNetworkClassifiers = true;
+createDataForNeuralNetworkTraining = true;
+createNeuralNetworkClassifiers = false;
+hiddenNeuralNetworkNeurons = 10;
 NeuralNetworksLearningOutputFolder = [LearningFolder 'NeuralNetworkClassifier/'];
 mkdir(NeuralNetworksLearningOutputFolder);
                    
@@ -99,13 +100,25 @@ for subjectIdx = 1 : numel(subjects)
             
             else
            %% Classification Mode
-                   
+                    
+                 %% Gather Training Statistics
+                   LearningOutputFolder = [StatisticsLearningOutputFolder subject '/' run '/'];
+                   mkdir(LearningOutputFolder);
+                   if (trainStatistics)
+        
+                       %prapre all the needed data for statistical
+                       %gathering of the current run
+                       [scans, regressors, irfDictionary] = PrapareClassifyRun(subject, run, irfFileLengthFolder, regressorsFolder, scansFolder, maskPath, featuresFolder, irfDictionariesFolder);
+
+                       
+                   end
+           
                  %% Training Mode
                    LearningOutputFolder = [NeuralNetworksLearningOutputFolder subject '/' run '/'];
                    mkdir(LearningOutputFolder);
-                   if (trainClassifiers)
+                   if (trainNeuralNetworkClassifiers)
                        
-                       if (createData)
+                       if (createDataForNeuralNetworkTraining)
                            % go over all the other training runs
                            trainingRuns = cell(3,1);
                            if (~isempty(strfind(run,'1')))
@@ -124,17 +137,25 @@ for subjectIdx = 1 : numel(subjects)
                            targets = cell(size(testedConditions));
                            neuronsMask = ones(1, 2500); %TODO: Change the number!!!!!!!!!!!!!!!
 
-                           
+                           unionFeatures = [];
                            for trainingRunIdx = 1 : numel(trainingRuns)
 
                                trainingRun = char(trainingRuns{trainingRunIdx});
 
                                % read the necessery data
-                               [scans, regressors, irfDictionary] = PrapareClassifyRun(subject, trainingRun, irfFileLengthFolder, regressorsFolder, scansFolder, maskPath, featuresFolder, irfDictionariesFolder);
-
+                               [scans, regressors, irfDictionary, features] = PrapareClassifyRun(subject, trainingRun, irfFileLengthFolder, regressorsFolder, scansFolder, maskPath, featuresFolder, irfDictionariesFolder);
+                               
+                               if (isempty(unionFeatures))
+                                   unionFeatures = features;
+                               else
+                                   unionFeatures = unionFeatures | features;
+                               end
+                               
+                               continue;
+                               
                                % extract all the combinations information 
-                               [runDataPoints, runTargets , runNeuronsMask] = CreateDataForTrainingClassifier(scans, regressors, irfDictionary, testedConditions, 0, 1, size(irfDictionary,2), 'Voting');
-
+                               [runDataPoints, runTargets , runNeuronsMask] = CreateDataForTrainingClassifier(scans, regressors, irfDictionary, testedConditions, 0, 1, size(irfDictionary,2), 'Voting');                              
+                               
                                save([LearningOutputFolder trainingRun], 'runDataPoints', 'runTargets', 'runNeuronsMask');
 
                                % union them to the full data store for training
@@ -144,13 +165,16 @@ for subjectIdx = 1 : numel(subjects)
                                    targets{conditionIdx} = [ targets{conditionIdx}  runTargets{conditionIdx}'];
                                end
                            end
-
+                           
+                           save([
+                           break;
+                           
                            save([LearningOutputFolder 'dataPoints'], 'dataPoints', 'targets', 'neuronsMask');
                        else
                            load([LearningOutputFolder 'dataPoints']);
                        end
                        
-                       if (createClassifiers)
+                       if (createNeuralNetworkClassifiers)
                            % train a stuck of classifiers, one for each condition, that each data point will
                            % be the vector x = [correlation to feature 1 : n]  and
                            % t = {1 , -1} where t will be 1 if this training vector
@@ -166,8 +190,8 @@ for subjectIdx = 1 : numel(subjects)
                                data = dataPoints{conditionIdx}(:, 1 : ceil(size(dataPoints{conditionIdx},2))); 
                                target = targets{conditionIdx}(:, 1 : ceil(size(targets{conditionIdx},2)));
                                data(~neuronsMask,:) = [];
-                               if (hiddenNeurons > 0)
-                                classifiers{conditionIdx} = fitnet(hiddenNeurons);
+                               if (hiddenNeuralNetworkNeurons > 0)
+                                classifiers{conditionIdx} = fitnet(hiddenNeuralNetworkNeurons);
                                else
                                 classifiers{conditionIdx} = perceptron;
                                end
@@ -175,13 +199,13 @@ for subjectIdx = 1 : numel(subjects)
 
                            end
 
-                           save([LearningOutputFolder 'classifiers' num2str(hiddenNeurons)], 'classifiers', 'tr');
+                           save([LearningOutputFolder 'classifiers' num2str(hiddenNeuralNetworkNeurons)], 'classifiers', 'tr');
                        else
-                           load([LearningOutputFolder 'classifiers' num2str(hiddenNeurons)]);
+                           load([LearningOutputFolder 'classifiers' num2str(hiddenNeuralNetworkNeurons)]);
                        end
                    else
                       load([LearningOutputFolder 'dataPoints']);
-                      load([LearningOutputFolder 'classifiers' num2str(hiddenNeurons)]); 
+                      load([LearningOutputFolder 'classifiers' num2str(hiddenNeuralNetworkNeurons)]); 
                    end    
                    
               %% Classification Code

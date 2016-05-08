@@ -8,12 +8,13 @@ regressorsFolder = '/home/haimshalev/Diacritics/Data/Regressors';
 scansFolder = '/home/haimshalev/Diacritics/Data/Scans/ScansMatlabMatrices';
 maskPath = '/home/haimshalev/Diacritics/Data/Mask/mask.mat';
 testedConditions = [1 2];
-classificationMode = 'Classifier'; % 'Summing','Voting' or 'Classifier'
+classificationMode = 'Voting'; % 'Summing','Voting' or 'Classifier'
 
 %% Selected Features Configurations 
 
-%featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesRunLevel';
-featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksSubjectLevelCrossValidation';
+%featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksForOneRun';
+%featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksSubjectLevelCrossValidation';
+featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesUnionOrRunLevelsCrossValidation/';
 featureSelectionMode = false;
 
 %% Selected Dictionary Configurations
@@ -99,6 +100,54 @@ for subjectIdx = 1 : numel(subjects)
             
             else
            %% Classification Mode
+                    
+                 %% Gather Training Statistics
+                   LearningOutputFolder = [StatisticsLearningOutputFolder subject '/' run '/'];
+                   mkdir(LearningOutputFolder);
+                   if (trainStatistics)
+        
+                       % go over all the other training runs
+                           trainingRuns = cell(3,1);
+                           if (~isempty(strfind(run,'1')))
+                               trainingRuns{1} = strrep(run, '1', '2');
+                           else
+                               trainingRuns{1} = strrep(run, '2', '1');
+                           end
+                           if (~isempty(strfind(run,'A')))
+                               trainingRuns{2} = strrep(run, 'A', 'B');
+                           else
+                               trainingRuns{2} = strrep(run, 'B', 'A');
+                           end
+                           trainingRuns{3} = strrep(trainingRuns{2}, run(length(run)), trainingRuns{1}(length(trainingRuns{1})));
+
+                           sumCorrects = [];
+                           sumTrials = 0;
+                           for trainingRunIdx = 1 : numel(trainingRuns)
+
+                               trainingRun = char(trainingRuns{trainingRunIdx});
+
+                               % read the necessery data
+                               [scans, regressors, irfDictionary, ~] = PrapareClassifyRun(subject, trainingRun, irfFileLengthFolder, regressorsFolder, scansFolder, maskPath, featuresFolder, irfDictionariesFolder, run);
+                               
+                               % extract all the combinations information 
+                               [corrects , trials] = GetAccurracyStaistics(scans, regressors, irfDictionary, testedConditions, 0, 1, size(irfDictionary,2), 'Voting');                              
+                               
+                               save([LearningOutputFolder trainingRun], 'corrects' , 'trials');
+
+                               if (isempty(sumCorrects))
+                                   sumCorrects = corrects;
+                               else
+                                   sumCorrects = sumCorrects + corrects;
+                               end
+                               sumTrials = sumTrials + trials;
+                           end
+                           
+                           corrects = sumCorrects;
+                           trials = sumTrials;
+                           save([LearningOutputFolder 'statistics'], 'corrects' , 'trials');
+                   else
+                       load([LearningOutputFolder 'statistics']);
+                   end    
                    
                  %% Training Mode
                    LearningOutputFolder = [NeuralNetworksLearningOutputFolder subject '/' run '/'];
@@ -124,17 +173,17 @@ for subjectIdx = 1 : numel(subjects)
                            targets = cell(size(testedConditions));
                            neuronsMask = ones(1, 2500); %TODO: Change the number!!!!!!!!!!!!!!!
 
-                           
+                           unionFeatures = [];
                            for trainingRunIdx = 1 : numel(trainingRuns)
 
                                trainingRun = char(trainingRuns{trainingRunIdx});
 
                                % read the necessery data
-                               [scans, regressors, irfDictionary] = PrapareClassifyRun(subject, trainingRun, irfFileLengthFolder, regressorsFolder, scansFolder, maskPath, featuresFolder, irfDictionariesFolder);
-
+                               [scans, regressors, irfDictionary, ~] = PrapareClassifyRun(subject, trainingRun, irfFileLengthFolder, regressorsFolder, scansFolder, maskPath, featuresFolder, irfDictionariesFolder);
+                               
                                % extract all the combinations information 
-                               [runDataPoints, runTargets , runNeuronsMask] = CreateDataForTrainingClassifier(scans, regressors, irfDictionary, testedConditions, 0, 1, size(irfDictionary,2), 'Voting');
-
+                               [runDataPoints, runTargets , runNeuronsMask] = CreateDataForTrainingClassifier(scans, regressors, irfDictionary, testedConditions, 0, 1, size(irfDictionary,2), 'Voting');                              
+                               
                                save([LearningOutputFolder trainingRun], 'runDataPoints', 'runTargets', 'runNeuronsMask');
 
                                % union them to the full data store for training
@@ -144,7 +193,7 @@ for subjectIdx = 1 : numel(subjects)
                                    targets{conditionIdx} = [ targets{conditionIdx}  runTargets{conditionIdx}'];
                                end
                            end
-
+                           
                            save([LearningOutputFolder 'dataPoints'], 'dataPoints', 'targets', 'neuronsMask');
                        else
                            load([LearningOutputFolder 'dataPoints']);
@@ -199,8 +248,11 @@ for subjectIdx = 1 : numel(subjects)
                         for endTr = size(irfDictionary,2) : size(irfDictionary,2)
                             % classify the data
                             disp(['Classifying data of subject ' subject 'run ' run 'irfLength ' irfFileLengthFolder]);
+                            %[classificationRes, confusionMatrix] = ClassifyData(scans, regressors, irfDictionary, testedConditions, previousWindowSize, startTr, endTr, ...
+                            %                                       classificationMode, struct('classifiers', {classifiers}, 'classifierNeuronsMask' ,neuronsMask));
+                            
                             [classificationRes, confusionMatrix] = ClassifyData(scans, regressors, irfDictionary, testedConditions, previousWindowSize, startTr, endTr, ...
-                                                                    classificationMode, struct('classifiers', {classifiers}, 'classifierNeuronsMask' ,neuronsMask));
+                                                                    classificationMode, struct('stats', corrects ./ trials));
 
                             % update the results map
 
