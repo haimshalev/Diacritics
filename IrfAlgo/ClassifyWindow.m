@@ -1,4 +1,4 @@
-function [classificationVec, Grades, neuronsMask] = ClassifyWindow( testWindow, timeCourse, irfDictionary, testedConditions, previousWindowTRs, startTrIdx, endTrIdx, classificationMode, extraParams)
+function [classificationVec, Grades, neuronsMask, votingOfEachVoxel] = ClassifyWindow( testWindow, timeCourse, irfDictionary, testedConditions, previousWindowTRs, startTrIdx, endTrIdx, classificationMode, extraParams)
 %CLASSIFYTESTDATA Summary will return the best permutation classification
 %for the whole window
 %matrix, 
@@ -40,9 +40,30 @@ trialsInWindowIdxs = find(timeCourse) + size(previousWindowTRs,2);
 combinations = CreateCombinations(1:numOfConditions,length(trialsInWindowIdxs), testedConditions);
 numOfCombinations = size(combinations,1);
 
+%% Reduce neurons by training statistics
+
+if (strcmp(classificationMode,'Voting'))
+    if (exist('extraParams','var') && isfield(extraParams,'stats'))
+            disp('Doing statistical voting');
+            stats = extraParams.stats;
+        else
+            stats = ones(1, size(irfDictionary, 1));
+        end
+                
+        % add the statistics
+        % first condition
+        higherstats = stats - (0.5 + std(stats(stats~=0)));
+        higherstats(higherstats <= 0) = 0;
+
+        lowerstats = (0.5 - std(stats(stats~=0))) - stats;
+        lowerstats(lowerstats <= 0) = 0;
+        lowerstats(stats == 0) = 0;
+end
+
 % get the measured response matrix and normalize it so the avg will be zero
 measuredResponse = testWindow - repmat(mean(testWindow,2), 1,size(testWindow,2));
-removedNeurons = find(std(measuredResponse') < 10);
+removedNeurons = intersect(find(higherstats == 0), find(lowerstats == 0));
+removedNeurons = union(removedNeurons,find(std(measuredResponse') < 10));
 neuronsMask = ones(1,size(testWindow,1));
 neuronsMask(removedNeurons) = zeros(size(removedNeurons));
 neuronsMask = logical(neuronsMask);
@@ -56,6 +77,8 @@ if (numOfVoxels == 0)
 end
 
 measuredResponseNorms = arrayfun(@(idx) norm(measuredResponse(idx,:)), 1:size(measuredResponse,1));
+
+
 
 %% classification
 
@@ -94,6 +117,10 @@ end
 maxAbsolute = max(abs(SumGradesMat(:)));
 SumGradesMat = SumGradesMat./maxAbsolute;
 
+Grades = zeros(size(SumGradesMat,1), size(irfDictionary, 1));
+mask = logical(repmat(neuronsMask, size(SumGradesMat,1), 1));
+Grades(mask) = SumGradesMat;
+
 switch classificationMode
     case 'Summing'
 
@@ -109,11 +136,31 @@ switch classificationMode
         
     case 'Voting'
         
-        [maxGrades ,winnerIndces]=max(SumGradesMat);
-        h = hist(winnerIndces,length(testedConditions));
-        [~, winnerClass] = max(h);
-        winnerCombination = ((winnerClass -1 ) * (size(SumGradesMat,1) ./ length(testedConditions))) + 1;
+        if (exist('extraParams','var') && isfield(extraParams,'stats'))
+            disp('Doing statistical voting');
+            stats = extraParams.stats;
+        else
+            stats = ones(1, size(irfDictionary, 1));
+        end
         
+        [~ ,winnerIndces]=max(SumGradesMat);
+        [h, x] = hist(winnerIndces,length(testedConditions));
+        votingOfEachVoxel = zeros(1, size(irfDictionary, 1));
+        [~, votingOfEachVoxel(neuronsMask)] = min(abs(repmat(winnerIndces, length(testedConditions),1) - repmat(x',1,size(winnerIndces,2))));
+        votes = zeros(1, length(testedConditions));
+        
+        % add the statistics
+        % first condition       
+        votes(1) = sum((votingOfEachVoxel == 1) .* higherstats);
+        votes(2) = sum((votingOfEachVoxel == 1) .* lowerstats);
+        
+        % second condition
+        votes(2) = votes(2) + sum((votingOfEachVoxel == 2) .* higherstats);
+        votes(1) = votes(1) + sum((votingOfEachVoxel == 2) .* lowerstats);
+        
+        % vote for the winner
+        [~, winnerClass] = max(votes);
+        winnerCombination = ((winnerClass -1 ) * (size(SumGradesMat,1) ./ length(testedConditions))) + 1;
     case 'Classifier'
         
         if (~exist('extraParams') || ~isfield(extraParams,'classifiers') || ~isfield(extraParams, 'classifierNeuronsMask'))
@@ -123,9 +170,6 @@ switch classificationMode
         classifiers = extraParams.classifiers;
         classifierNeuronsMask = extraParams.classifierNeuronsMask;
         
-        Grades = zeros(size(SumGradesMat,1), size(irfDictionary, 1));
-        mask = logical(repmat(neuronsMask, size(SumGradesMat,1), 1));
-        Grades(mask) = SumGradesMat;
         numberOfCombinationsForEachCondition = size(SumGradesMat,1) ./ length(testedConditions);
         dataToClassify = Grades';
         dataToClassify(~classifierNeuronsMask,:) = [];
