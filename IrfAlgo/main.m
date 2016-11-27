@@ -3,23 +3,23 @@ clear
 disp ('Classification By Generation - Main Script');
 
 %% Global Configuration
-
-regressorsFolder = '/home/haimshalev/Diacritics/Data/Regressors';
-scansFolder = '/home/haimshalev/Diacritics/Data/Scans/ScansMatlabMatrices';
-maskPath = '/home/haimshalev/Diacritics/Data/Mask/mask.mat';
+dataFolder = '/home/Data/HaimShalev/Data/';
+regressorsFolder = [dataFolder 'Regressors'];
+scansFolder = [dataFolder 'Scans/ScansMatlabMatrices'];
+maskPath = [dataFolder 'Mask/mask.mat'];
 testedConditions = [1 2];
 classificationMode = 'Voting'; % 'Summing','Voting' or 'Classifier'
 
 %% Selected Features Configurations 
 
-%featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksForOneRun';
-%featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesMasksSubjectLevelCrossValidation';
-featuresFolder = '/home/haimshalev/Diacritics/Data/Mask/FeaturesUnionOrRunLevelsCrossValidation/';
+%featuresFolder = [dataFolder 'Mask/FeaturesMasksForOneRun'];
+featuresFolder = [dataFolder 'Mask/FeaturesMasksSubjectLevelCrossValidation'];
+%featuresFolder = [dataFolder 'Mask/FeaturesUnionOrRunLevelsCrossValidation/'];
 featureSelectionMode = false;
 
 %% Selected Dictionary Configurations
 
-irfsFolder = '/home/haimshalev/Diacritics/Data/IRFs/';
+irfsFolder = [dataFolder 'IRFs/'];
 
 % for run level use - 
 %irfDictionariesFolder = [irfsFolder 'OutputFolderRunLevel'];
@@ -35,7 +35,7 @@ LearningFolder = 'LearningData/';
 
 % statistics gathering
 trainStatistics = false;
-StatisticsLearningOutputFolder = [LearningFolder 'Statistics/']; 
+StatisticsLearningOutputFolder = [LearningFolder 'Statistics2500/']; 
 mkdir(StatisticsLearningOutputFolder);
 
 % neural network classifiers
@@ -234,7 +234,7 @@ for subjectIdx = 1 : numel(subjects)
                    end    
                    
               %% Classification Code
-              
+                              
                 %prapre all the needed data for classification
                 [scans, regressors, irfDictionary] = PrapareClassifyRun(subject, run, irfFileLengthFolder, regressorsFolder, scansFolder, maskPath, featuresFolder, irfDictionariesFolder);
 

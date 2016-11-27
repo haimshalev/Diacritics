@@ -45,21 +45,15 @@ numOfCombinations = size(combinations,1);
 if (strcmp(classificationMode,'Voting'))
     if (exist('extraParams','var') && isfield(extraParams,'stats'))
             disp('Doing statistical voting');
-            stats = extraParams.stats;
-        else
+            stats = extraParams.stats';
+    else
             stats = ones(1, size(irfDictionary, 1));
-        end
-                
-        % add the statistics
-        % first condition
-        higherstats = stats - (0.5 + std(stats(stats~=0)));
-        higherstats(higherstats <= 0) = 0;
+    end
+    
+    stdCoeff = 1.8;                    
+    [~, higherstats, lowerstats] = GetBestStats(stats, stdCoeff);
 
-        lowerstats = (0.5 - std(stats(stats~=0))) - stats;
-        lowerstats(lowerstats <= 0) = 0;
-        lowerstats(stats == 0) = 0;
-        
-        removedNeurons = intersect(find(higherstats == 0), find(lowerstats == 0));
+    removedNeurons = intersect(find(higherstats == 0), find(lowerstats == 0));
 else 
         removedNeurons = [];
 end
@@ -141,9 +135,9 @@ switch classificationMode
         
         if (exist('extraParams','var') && isfield(extraParams,'stats'))
             disp('Doing statistical voting');
-            stats = extraParams.stats;
+            numTrials = extraParams.numOfTrials';
         else
-            stats = ones(1, size(irfDictionary, 1));
+            numTrials = ones(1, size(irfDictionary, 1));
         end
         
         [~ ,winnerIndces]=max(SumGradesMat);
@@ -154,12 +148,12 @@ switch classificationMode
         
         % add the statistics
         % first condition       
-        votes(1) = sum((votingOfEachVoxel == 1) .* higherstats);
-        votes(2) = sum((votingOfEachVoxel == 1) .* lowerstats);
+        votes(1) = sum((votingOfEachVoxel == 1) .* higherstats' .* numTrials);
+        votes(2) = sum((votingOfEachVoxel == 1) .* lowerstats' .* numTrials);
         
         % second condition
-        votes(2) = votes(2) + sum((votingOfEachVoxel == 2) .* higherstats);
-        votes(1) = votes(1) + sum((votingOfEachVoxel == 2) .* lowerstats);
+        votes(2) = votes(2) + sum((votingOfEachVoxel == 2) .* higherstats' .* numTrials);
+        votes(1) = votes(1) + sum((votingOfEachVoxel == 2) .* lowerstats' .* numTrials);
         
         % vote for the winner
         [~, winnerClass] = max(votes);
